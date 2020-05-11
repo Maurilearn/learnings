@@ -1,0 +1,22 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+<a href="{{url_for('quizz.track_add')}}">Create track</a>
+<br>
+<h2>Quizz tracks</h2>
+
+{%for track in tracks%}
+    {{track.name}} by {{track.creator.name}} 
+        <a href="{{url_for('quizz.track_view', track_id=track.id)}}">view</a>
+        <a href="{{url_for('quizz.track_delete', track_id=track.id)}}">delete</a>
+        <br>
+{%endfor%}
+{% endblock %}

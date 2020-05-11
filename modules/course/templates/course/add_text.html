@@ -1,0 +1,27 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+<br>
+
+<form action="{{url_for('course.subsection_add_text_check', subsection_id=subsection.id)}}" method="POST">
+
+<div class="form-field">
+{{ form.text.label }} <br>
+{{ form.text }}
+</div>
+
+{{ form.submit }}
+{{ form.csrf_token }}
+</form>
+
+
+{% endblock %}

@@ -1,0 +1,41 @@
+
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+<link rel="stylesheet"
+  href="/static/highlightjs/styles/atelier-forest-light.css">
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+<br>
+{% set section = subsection.section%}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{{url_for('course.view', course_id=section.course.id)}}">
+        {{section.course.name}}</a></li>
+    <li class="breadcrumb-item"><a href="{{url_for('course.view', course_id=section.course.id)}}">
+        {{subsection.section.name}}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{subsection.name}}</li>
+  </ol>
+</nav>
+<br>
+
+<a href="{{url_for('course.subsection_add_text', subsection_id=subsection.id)}}">Add text</a> <a href="">Add file</a>
+<br>
+
+{%for resource in subsection.resources%}
+    <a href="">edit</a> <a href="{{url_for('course.resource_delete', resource_id=resource.id)}}">delete</a><br>
+    {%if resource.type == 'text'%}
+        {{ render_md(resource.text) | safe }}
+    {%endif%}
+{%endfor%}
+
+<script src="/static/highlightjs/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+{% endblock %}

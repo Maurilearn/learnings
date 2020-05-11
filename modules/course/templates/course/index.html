@@ -1,0 +1,37 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+<br>
+<a class="" href="{{url_for('course.add')}}">Add Course</a> |
+<a class="" href="{{url_for('course.add')}}">Add For Others</a>
+<br>
+<h1>Courses</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Author</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+{% for course in courses %}
+    {%set teacher = User.query.get(course.teacher_id)%}
+    <tr>
+        <td>{{course.name}}</td>
+        <td>{{teacher.name}}</td>
+        <td><a href="{{url_for('course.view', course_id=course.id)}}">view</a> <a href="">delete</a> <a href="">edit</a></td>
+    </tr>
+{%endfor%}
+    </tbody>
+</table>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+
+<form action="{{url_for('course.add_check')}}" method="POST">
+
+<div class="form-field">
+{{ form.name.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-key"></i></span>
+    </div>
+    {{ form.name }}
+</div>
+
+{{ form.submit }}
+{{ form.csrf_token }}
+</form>
+
+{% endblock %}

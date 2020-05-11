@@ -1,0 +1,94 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+{%for message in messages%}
+        {{message}}
+{%endfor%}
+<br>
+<div class="row">
+    <div class="col-sm-9">
+<table class="table ">
+    <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Pass</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {%for student in students%}
+        <tr>
+          <form action="{{url_for('student.edit', student_id=student.id)}}" method="POST">
+            <td><input name="student_name"
+                  class="form-control" value="{{student.name}}"></td>
+            <td><input name="student_email"
+                  class="form-control" value="{{student.email}}"></td>
+            <td><input name="student_password" 
+                  class="form-control" value=""></td>
+            <td><input class="btn btn-info" type="submit" value="save"></td>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          </form>
+          <td><a 
+                class="btn btn-danger" 
+                href="{{url_for('student.delete', student_id=student.id)}}">delete</a></td>
+        </tr>
+        {%endfor%}
+      </tbody>
+</table>
+    </div>
+    <div class="col-sm-3">
+        <div class="card">
+          <div class="card-header">
+            Add Student
+          </div>
+          <div class="card-body">
+
+<form action="{{url_for('student.add_check')}}" method="POST">
+
+<div class="form-field">
+{{ form.name.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-key"></i></span>
+    </div>
+    {{ form.name }}
+</div>
+
+<div class="form-field">
+{{ form.email.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-key"></i></span>
+    </div>
+    {{ form.email }}
+</div>
+
+<div class="form-field">
+{{ form.password.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-key"></i></span>
+    </div>
+    {{ form.password }}
+</div>
+
+{{ form.submit }}
+{{ form.csrf_token }}
+</form>
+
+          </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

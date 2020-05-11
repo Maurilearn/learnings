@@ -1,0 +1,29 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+<br>
+<a href="{{url_for('quizz.index')}}">back</a><br>
+<h2>{{track.name}} by {{track.creator.name}}</h2>
+
+<a href="{{url_for('quizz.quizz_add', track_id=track.id)}}">Add quizz</a><br>
+
+<img src="{{url_for('static', filename=track.award.img_path)}}">
+
+<br>
+
+{%for quizz in track.quizzes%}
+    {{quizz.question}} 
+    	<a href="{{url_for('quizz.view', quizz_id=quizz.id)}}">view</a>
+    	<a href="{{url_for('quizz.delete', quizz_id=quizz.id)}}">delete</a>
+    	<br>
+{%endfor%}
+
+{% endblock %}

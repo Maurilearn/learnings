@@ -1,0 +1,71 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+<br>
+<a href="{{url_for('quizz.track_view', track_id=track.id)}}">back</a><br><br>
+
+<form action="{{url_for('quizz.quizz_add_check', track_id=track.id)}}" method="POST">
+
+<div class="form-field">
+<h4> Quizz Question </h4><br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-key"></i></span>
+    </div>
+    <input type="text" name="question" autocomplete="off" class="form-control" required>
+</div>
+</div>
+
+
+<h4>Answers </h4><br>
+<input type="button" class="btn btn-info" id="answer-plus" value="+">
+<input type="button" class="btn btn-info" id="answer-minus" value="-">
+<br><br>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Correct?</th>
+            <th>Option</th>
+        </tr>
+    </thead>
+    <tbody id="tbody">
+        <tr>
+            <td><input type="checkbox" name="correct_1" class="form-control"></td>
+            <td><input type="text" name="answer_1" class="form-control"></td>
+        </tr>
+    </tbody>
+</table>
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+    <input type="submit" name="" value="submit" class="btn btn-info">
+</form>
+
+<script type="text/javascript">
+$( document ).ready(function() {
+    var ansNum = 1;
+    $( "#answer-plus" ).click(function() {
+        ansNum += 1;
+        row = '<tr id="row_'+ansNum.toString()+'">' +
+            '<td><input type="checkbox" name="correct_'+ansNum.toString()+'" class="form-control"></td>'+
+            '<td><input type="text" name="answer_'+ansNum.toString()+'" class="form-control"></td>'+
+        '</tr>';
+        $('#tbody').append(row);
+    });
+    
+    $(document).on('click','#answer-minus',function() {
+        if (ansNum > 1) {
+            
+            $('#row_'+ansNum.toString()).remove()
+            ansNum -= 1;
+        }
+    });
+});
+</script>
+{% endblock %}

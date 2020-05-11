@@ -1,0 +1,13 @@
+popup for operations
+eg. save successful
+
+quiz tied to subsection
+quiz unlocked after notes
+
+quiz passing 50% pass
+
+on course completion notify teacher by mail
+teacher approve
+student gets certificate of completion (pdf)
+
+one subsection 10 quiz

@@ -1,0 +1,85 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+{% set glob={} %}
+
+<a href="{{url_for('quizz.track_view', track_id=quizz.quizz_track.id)}}">back</a>
+<br>
+
+<form action="{{url_for('quizz.quizz_update', quizz_id=quizz.id)}}" method="POST">
+
+<div class="form-field">
+<h4> Quizz Question </h4><br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-key"></i></span>
+    </div>
+    <input type="text" name="question" autocomplete="off" class="form-control" required
+        value="{{quizz.question}}">
+</div>
+</div>
+
+
+<h4>Answers </h4><br>
+<input type="button" class="btn btn-info" id="answer-plus" value="+">
+<input type="button" class="btn btn-info" id="answer-minus" value="-">
+<br><br>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Correct?</th>
+            <th>Option</th>
+        </tr>
+    </thead>
+    <tbody id="tbody">
+        {%set ansNum = 0%}
+        {%for answer in quizz.answers%}
+        <tr>
+            <td><input type="checkbox" name="correct_{{loop.index+1}}" class="form-control"
+                {%if answer.correct%}
+                    checked
+                {%endif%}
+                ></td>
+                
+            <td><input type="text" name="answer_{{loop.index+1}}" class="form-control"
+                value="{{answer.string}}"></td>
+        </tr>
+        {% set _ = glob.update({'ansNum':loop.index+1}) %}
+        {%endfor%}
+    </tbody>
+</table>
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+    <input type="submit" name="" value="save" class="btn btn-info">
+</form>
+
+<script type="text/javascript">
+$( document ).ready(function() {
+    var ansNum = {{glob['ansNum'] | safe}};
+    $( "#answer-plus" ).click(function() {
+        ansNum += 1;
+        row = '<tr id="row_'+ansNum.toString()+'">' +
+            '<td><input type="checkbox" name="correct_'+ansNum.toString()+'" class="form-control"></td>'+
+            '<td><input type="text" name="answer_'+ansNum.toString()+'" class="form-control"></td>'+
+        '</tr>';
+        $('#tbody').append(row);
+    });
+    
+    $(document).on('click','#answer-minus',function() {
+        if (ansNum > 1) {
+            
+            $('#row_'+ansNum.toString()).remove()
+            ansNum -= 1;
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+
+<a href="{{url_for('quizz.index')}}">back</a>
+
+
+
+<form action="{{url_for('quizz.track_add_check')}}" method="POST" enctype="multipart/form-data">
+{{ form.hidden_tag() }}
+<div class="form-field">
+{{ form.name.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-key"></i></span>
+    </div>
+    {{ form.name }}
+</div>
+{% for error in form.name.errors %}
+<li>{{ error }}</li>
+{% endfor %}
+<br>
+{{ form.award_image.label }}<br>
+{{ form.award_image }}
+{% for error in form.award_image.errors %}
+<li>{{ error }}</li>
+{% endfor %}
+
+<br>
+{{ form.submit }}
+</form>
+
+{% endblock %}

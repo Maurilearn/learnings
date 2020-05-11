@@ -1,0 +1,15 @@
+{
+    "environment": "development",
+    "user": {
+      "email": "arj.python@gmail.com",
+      "password": "pass",
+      "role": "admin",
+      "name": "Abdur-Rahmaan Janhangeer",
+      "admin": true
+    },
+    "settings": {
+      "APP_NAME": "Demo",
+      "SECTION_NAME": "Manufacturer",
+      "SECTION_ITEMS": "Products"
+    }
+}

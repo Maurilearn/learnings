@@ -26,7 +26,11 @@
 </nav>
 <br>
 
-<a href="{{url_for('course.subsection_add_text', subsection_id=subsection.id)}}">Add text</a> <a href="">Add file</a>
+{%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
+<a href="{{url_for('course.subsection_add_text', subsection_id=subsection.id)}}">Add text</a> 
+<a href="">Add file</a>
+{%endif%}
+
 <br>
 
 {%for resource in subsection.resources%}

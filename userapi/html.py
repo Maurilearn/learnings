@@ -23,5 +23,8 @@ def notify_success(message):
 def notify_danger(message):
     return notify(message, alert_type='danger')
 
+def notify_warning(message):
+    return notify(message, alert_type='warning')
+
 def notify_info(message):
     return notify(message, alert_type='info')

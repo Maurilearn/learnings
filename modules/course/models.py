@@ -1,6 +1,7 @@
 from shopyoapi.init import db
 from datetime import datetime
 
+
 class Course(db.Model):
     __tablename__ = 'courses'
     id = db.Column(db.Integer, primary_key=True)
@@ -115,3 +116,45 @@ class Resource(db.Model):
         db.session.commit()
 
 
+class QuizHistory(db.Model):
+    __tablename__ = 'quiz_histories'
+    id = db.Column(db.Integer, primary_key=True)
+    person_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+        nullable=False)
+    section_id = db.Column(db.Integer, db.ForeignKey('sections.id'),
+        nullable=False)
+    completed = db.Column(db.Boolean, default=True,
+        nullable=True)
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class ChapterHistory(db.Model):
+    __tablename__ = 'section_histories'
+    id = db.Column(db.Integer, primary_key=True)
+    person_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+        nullable=False)
+    subsection_id = db.Column(db.Integer, db.ForeignKey('sub_sections.id'),
+        nullable=False)
+    completed = db.Column(db.Boolean, default=True,
+        nullable=True)
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()

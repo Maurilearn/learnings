@@ -48,7 +48,12 @@ def check_login ():
                 flash("please check your user id and password")
                 return redirect(url_for("auth.login"))
             login_user(user)
-            return redirect(url_for("course.index"))
+            if user.role in ['admin', 'teacher']:
+                return redirect(url_for("course.index"))
+                
+            else:
+                return redirect(url_for("course.list"))
+                
         else:
             return render_template('auth/login.html', form=form)
         #'''

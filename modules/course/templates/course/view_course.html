@@ -12,16 +12,26 @@
 {%include 'course/partials/nav.html'%}
 <br>
 <h2>{{course.name}} by {{author.name}}</h2>
+
+{%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
 <div><a href="{{url_for('course.add_section', course_id=course.id)}}">Add section</a></div>
+{%endif%}
+
 <br>
 {%for section in course.sections%}
     <div class="card">
         <div class="card-header">
             {{section.name}} 
+
+            {%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
             <a href="{{url_for('course.add_subsection', section_id=section.id)}}">Add subsection</a> 
             <a href="{{url_for('course.delete_section', section_id=section.id)}}">delete</a>
+            {%endif%}
+
         </div>
         <div class="card-body">
+            <a href="{{url_for('course.take_quiz', section_id=section.id)}}">take quiz</a><br>
+
             {%for subsection in section.sub_sections%}
                 {{subsection.name}} 
                 <a href="{{url_for('course.view_subsection', subsection_id=subsection.id)}}">view</a><br>

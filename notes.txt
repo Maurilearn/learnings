@@ -1,13 +1,16 @@
-popup for operations
+[x] popup for operations
 eg. save successful
 
-quiz tied to subsection
-quiz unlocked after notes
+[x] quiz tied to subsection
+[ ] quiz unlocked after notes
+[x] one subsection 10 quiz
 
-quiz passing 50% pass
+[x] course subscription
 
-on course completion notify teacher by mail
-teacher approve
-student gets certificate of completion (pdf)
+[ ] quiz passing 50% pass
 
-one subsection 10 quiz
+[ ] on course completion notify teacher by mail
+[ ] teacher approve
+[ ] student gets certificate of completion (pdf)
+
+[ ] homework mechanism

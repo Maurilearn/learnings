@@ -1,0 +1,56 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Course
+            </th>
+            <th>
+                Teacher
+            </th>
+            <th>
+                
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for course in mycourses%}
+            {%set teacher = User.query.get(course.teacher_id)%}
+            <tr>
+                <td>
+                {{course.name}}
+                </td>
+                <td>
+                {{teacher.name}}
+                </td>
+                <td>
+                    <a 
+                    class="btn btn-danger" 
+                    href="{{url_for('course.unsubscribe', course_id=course.id)}}">
+                        unsubscribe
+                    </a>
+                    <a 
+                    class="btn btn-info" 
+                    href="{{url_for('course.view', course_id=course.id)}}">
+                        view
+                    </a>
+                </td>
+            </tr>
+        {%endfor%}
+        
+    </tbody>
+</table>
+
+{% endblock %}

@@ -74,7 +74,7 @@ Section Name <br>
 
 
 <button id="submit" class="btn btn-info">Submit</button>
-<input id="csrf_token" name="csrf_token" type="hidden" value="csrf_token()">
+<input id="csrf_token" name="csrf_token" type="hidden" value="">
 </div><!--form end-->
 
 <script type="text/javascript">
@@ -113,6 +113,16 @@ $( document ).ready(function() {
 
     function update_all(){
         $("#quiz-number").html(current_quiz);
+    }
+    function get_num_empty_quiz(){
+        var count_quiz_empty = 0;
+        for (var i = 0; i < Object.keys(json_submit['quizes']).length; i++) {
+            var quest = json_submit['quizes'][(i+1).toString()]['question'];
+            if(quest.length === 0){
+                count_quiz_empty += 1;
+            }
+        }
+        return count_quiz_empty
     }
     function update_completed(){
         var count_quiz_empty = 0;
@@ -286,8 +296,35 @@ $( document ).ready(function() {
     });
     $("#submit").click(function(){
         update_completed();
-        if(not_quiz_empty() & not_section_name_empty() & completed_quiz == 10){
-            alert('ready to submit');
+        if(not_quiz_empty() & not_section_name_empty() & get_num_empty_quiz() <= 1){
+            // alert('ready to submit');
+            json_submit['section_name'] = $("#section-name").val().trim();
+            if(json_submit['quizes'][(10).toString()]['answers'].length === 0){
+                update_json();
+                update_completed();
+            }
+            $.ajax({
+
+                type: "POST",
+                url: "{{url_for('course.add_section_check', course_id=course.id)}}",
+                // The key needs to match your method's input parameter (case-sensitive).
+                data: JSON.stringify(json_submit),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function(data){
+                    // alert(data);
+                    window.location.reload();
+                    return false;
+                },
+                failure: function(errMsg) {
+                    alert(errMsg);
+                },
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{csrf_token()}}")
+                    }
+                }
+            });
         }else{
             alert('cannot submit');
         }

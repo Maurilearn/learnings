@@ -1,0 +1,55 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Course
+            </th>
+            <th>
+                Teacher
+            </th>
+            <th>
+                Subscribed
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for course in courses%}
+            {%set teacher = User.query.get(course.teacher_id)%}
+            <tr>
+                <td>
+                {{course.name}}
+                </td>
+                <td>
+                {{teacher.name}}
+                </td>
+                <td>
+                    <a 
+                    class="cancel-link" 
+                    href="{{url_for('course.toggle_subscribe', course_id=course.id)}}">
+                        {%if course in current_user.courses%}
+                            <i class="fa fa-check-circle" style="color:green"></i>
+                        {% else %}
+                            <i class="fa fa-times-circle" style="color: red;"></i>
+                        {%endif%}
+                    </a>
+                </td>
+            </tr>
+        {%endfor%}
+        
+    </tbody>
+</table>
+
+{% endblock %}

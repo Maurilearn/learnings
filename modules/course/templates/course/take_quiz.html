@@ -1,0 +1,40 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+<br>
+<h2></h2>
+
+<form action="{{url_for('course.check_quiz', section_id=section.id)}}" method="POST">
+
+{%for quiz in section.quizzes%}
+    Q: {{quiz.question}}
+    <table class="">
+        <tbody>
+            {%for answer in quiz.answers%}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="quiz_{{quiz.id}}_answer_{{answer.id}}">
+                    </td>
+                    <td>
+                        {{answer.string}}
+                    </td>
+                </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+    
+{%endfor%}
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+    <input type="submit" name="" value="submit" class="btn btn-info">
+</form>
+<br>
+{% endblock %}

@@ -14,28 +14,66 @@
 <h2>{{course.name}} by {{author.name}}</h2>
 
 {%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
-<div><a href="{{url_for('course.add_section', course_id=course.id)}}">Add section</a></div>
+<div><a class="btn btn-info" 
+    href="{{url_for('course.add_section', course_id=course.id)}}">
+    <i class="fa fa-plus"></i> Add section</a></div>
 {%endif%}
 
+{%if course_completed(course.id)%}
+
+Course completed. 
+    
+    {%if certificate_requested(course.id)%}
+        Certificate being processed
+    {%elif not certificate_approved(course.id)%}
+        <a class="btn btn-success" href="{{url_for('course.certificate_request', course_id=course.id)}}">Request Certificate</a>
+    {%elif certificate_approved(course.id)%}
+        {%set person_name = current_user.name.replace(' ', '_').replace('-', '_')%}
+        {%set course_name = course.name.replace(' ', '_').replace('-', '_')%}
+        {%set certif_path = person_name+'_'+course_name%}
+        <a class="btn btn-info" 
+        href="/static/certificates/{{certif_path}}.pdf"><i class="fa fa-search"></i> view certificate</a>
+    {%endif%}
+
+{%endif%}
+<br>
 <br>
 {%for section in course.sections%}
     <div class="card">
         <div class="card-header">
-            {{section.name}} 
+            <b>{{section.name}}</b> &nbsp;&nbsp;&nbsp;
 
             {%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
-            <a href="{{url_for('course.add_subsection', section_id=section.id)}}">Add subsection</a> 
-            <a href="{{url_for('course.delete_section', section_id=section.id)}}">delete</a>
+            <a class="btn btn-info" href="{{url_for('course.add_subsection', section_id=section.id)}}">Add chapter</a> 
+            <a class="btn btn-danger" href="{{url_for('course.delete_section', section_id=section.id)}}">delete</a>
             {%endif%}
 
         </div>
         <div class="card-body">
-            <a href="{{url_for('course.take_quiz', section_id=section.id)}}">take quiz</a><br>
-
+            <a class="btn btn-info" href="{{url_for('course.take_quiz', section_id=section.id)}}">take quiz</a>
+            {%if section_quiz_completed(current_user, section) %}
+                <i style="color:green;" class="fa fa-check-square"></i> quiz completed
+            {%endif%}
+            <br><br>
+            <table class="table">
+                <thead>
+                    <tr>
+                        
+                    </tr>
+                </thead>
+                <tbody>
             {%for subsection in section.sub_sections%}
+                <tr><td>
+                <a class="btn btn-info" 
+                href="{{url_for('course.view_subsection', subsection_id=subsection.id)}}">
+                    <i class="fa fa-search"></i>
+                </a>&nbsp;&nbsp;
                 {{subsection.name}} 
-                <a href="{{url_for('course.view_subsection', subsection_id=subsection.id)}}">view</a><br>
+                </td>
+                </tr>
             {%endfor%}
+                </tbody>
+            </table>
         </div>
     </div>
     <br>

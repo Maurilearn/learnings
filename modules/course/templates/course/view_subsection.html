@@ -27,14 +27,20 @@
 <br>
 
 {%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
-<a href="{{url_for('course.subsection_add_text', subsection_id=subsection.id)}}">Add text</a> 
-<a href="">Add file</a>
+<a class="btn btn-info" 
+  href="{{url_for('course.subsection_add_text', subsection_id=subsection.id)}}">
+  <i class="fa fa-pen-alt"></i> Add text</a> 
+<a class="btn btn-info" 
+  href="">
+  <i class="fa fa-file"></i> Add file</a>
 {%endif%}
 
-<br>
+<br><br>
 
 {%for resource in subsection.resources%}
-    <a href="">edit</a> <a href="{{url_for('course.resource_delete', resource_id=resource.id)}}">delete</a><br>
+    
+    <a class="badge badge-info" href="">edit</a> 
+    <a class="badge badge-danger" href="{{url_for('course.resource_delete', resource_id=resource.id)}}">delete</a><br>
     {%if resource.type == 'text'%}
         {{ render_md(resource.text) | safe }}
     {%endif%}

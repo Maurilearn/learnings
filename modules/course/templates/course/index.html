@@ -28,7 +28,17 @@
     <tr>
         <td>{{course.name}}</td>
         <td>{{teacher.name}}</td>
-        <td><a href="{{url_for('course.view', course_id=course.id)}}">view</a> <a href="">delete</a> <a href="">edit</a></td>
+        <td>
+            <a class="btn btn-info" href="{{url_for('course.view', course_id=course.id)}}">
+                <i class="fa fa-search"></i>
+            </a> 
+            <a class="btn btn-danger" href="">
+                <i class="fa fa-trash"></i>
+            </a> 
+            <a class="btn btn-warning" href="">
+                <i class="fa fa-pen"></i>
+            </a>
+        </td>
     </tr>
 {%endfor%}
     </tbody>

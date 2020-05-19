@@ -1,8 +1,14 @@
+import datetime
+import os
+
 from modules.auth.models import User
-from modules.course.models import Course
-from modules.course.models import Section
-from modules.course.models import SubSection
+from .models import Course
+from .models import Section
+from .models import SubSection
 from .models import Resource
+from .models import QuizHistory
+from .models import CertificateRequest
+from .models import Certificate
 
 from modules.course.forms import AddCourseForm
 from modules.course.forms import AddSectionForm
@@ -35,6 +41,10 @@ from userapi.html import notify_warning
 
 from modules.quiz.models import Quiz
 from modules.quiz.models import Answer
+
+from reportlab.pdfgen import canvas
+
+
 
 course_blueprint = Blueprint(
     "course",
@@ -81,6 +91,59 @@ def view(course_id):
     course = Course.query.get(course_id)
     context['course'] = course
     context['author'] = User.query.get(course.teacher_id)
+    def section_quiz_completed(current_user, section):
+        if QuizHistory.query.filter(
+                (QuizHistory.person_id == current_user.id) &
+                (QuizHistory.section_id == section.id)
+                ).first():
+            return True
+        return False
+
+    def course_completed(course_id):
+        '''
+        quizhistory filter 
+            qhistory.person.id == current.id and 
+            qhistory.section.course.id == course id
+        
+        if QuizHistory.query.filter(
+                (QuizHistory.person_id == current_user.id) &
+                (QuizHistory.section.course.id == course_id)
+                ).count() == len(course.sections):
+        '''
+        course = Course.query.get(course_id)
+        person_quiz = QuizHistory.query.filter(
+                (QuizHistory.person_id == current_user.id)
+                ).all()
+        completed_sections = []
+        for completed in person_quiz:
+            section = Section.query.get(completed.section_id)
+            if section.course.id == course.id:
+                completed_sections.append(completed)
+        if len(completed_sections) == len(course.sections):
+            return True
+        return False
+
+    def certificate_requested(course_id):
+        if CertificateRequest.query.filter(
+                (CertificateRequest.course_taker_id == current_user.id) &
+                (CertificateRequest.course_id == course_id)
+                ).first():
+            return True
+        return False
+
+    def certificate_approved(course_id):
+        if Certificate.query.filter(
+                (Certificate.course_taker_id == current_user.id) &
+                (Certificate.course_id == course_id)
+                ).first():
+            return True
+        return False
+
+    context['section_quiz_completed'] = section_quiz_completed
+    context['course_completed'] = course_completed
+    context['certificate_requested'] = certificate_requested
+    context['certificate_approved'] = certificate_approved
+
     return render_template('course/view_course.html', **context)
 
 @course_blueprint.route("/<course_id>/add/section")
@@ -197,10 +260,10 @@ def take_quiz(section_id):
 def check_quiz(section_id):
     if request.method == 'POST':
         correct_answers = 0
-        flash(notify_info(request.form))
+        # flash(notify_info(request.form))
         section = Section.query.get(section_id)
         submitted_quiz = [name for name in request.form if name.startswith('quiz_')]
-        flash(notify_info(submitted_quiz))
+        # flash(notify_info(submitted_quiz))
         db_json  = {}
         if len(submitted_quiz) == 0:
             flash(notify_warning("Can't be empty"))
@@ -213,7 +276,7 @@ def check_quiz(section_id):
                 if q_id not in quiz_seen:
                     quiz_seen[int(q_id)] = []
                 quiz_seen[int(q_id)].append(int(a_id))
-            flash(notify_info(quiz_seen))
+            # flash(notify_info(quiz_seen))
             if len(quiz_seen) != 10:
                 flash(notify_warning('All questions must be answered!'))
             
@@ -223,12 +286,18 @@ def check_quiz(section_id):
                     for answer in quiz.answers:
                         if answer.correct == True:
                             db_json[quiz.id].append((answer.id))
-                flash(notify_info(db_json))
+                # flash(notify_info(db_json))
 
                 for q in db_json:
                     if quiz_seen[q] == db_json[q]:
                         correct_answers += 1
-                flash(notify_success('correct answers: {}'.format(correct_answers)))
+                
+                if (correct_answers/10)*100 >= 50:
+                    quiz_history = QuizHistory(person_id=current_user.id, section_id=section.id)
+                    quiz_history.insert()
+                    flash(notify_success('Great! correct answers: {}/10'.format(correct_answers)))
+                else:
+                    flash(notify_warning('Oh oh! correct answers: {}/10'.format(correct_answers)))
         return redirect(url_for('course.take_quiz', section_id=section_id))
 
 
@@ -277,3 +346,99 @@ def unsubscribe(course_id):
     current_user.update()
     flash(notify_warning('Unsubscribed from {}!'.format(course.name)))
     return redirect(url_for('course.mycourses'))
+
+@course_blueprint.route("/<course_id>/certificate/request", methods=['GET', 'POST'])
+@login_required
+def certificate_request(course_id):
+    if CertificateRequest.query.filter(
+                (CertificateRequest.course_taker_id == current_user.id) &
+                (CertificateRequest.course_id == course_id)
+                ).first():
+        flash(notify_warning('Certificate being processed!'))
+    else:
+        cert_req = CertificateRequest(
+            course_taker_id=current_user.id,
+            course_id=course_id
+            )
+        cert_req.insert()
+        flash(notify_success('Certificate requested!'))
+    return redirect(url_for('course.view', course_id=course_id))
+
+@course_blueprint.route("/view/certificate/request", methods=['GET', 'POST'])
+@login_required
+def view_certificate_request():
+    if current_user.role in ['admin', 'teacher']:
+        context = base_context()
+        if current_user.role == 'admin':
+            certif_requests = CertificateRequest.query.all()
+            context['certif_requests'] = certif_requests
+        else:
+            c_requests = []
+            for cert_request_item in CertificateRequest.query.all():
+                course = Course.query.get(cert_request_item.course_id)
+                if course.teacher_id == current_user.id:
+                    c_requests.append(cert_request_item)
+            context['certif_requests'] = c_requests
+        context['User'] = User
+        context['Course'] = Course
+        return render_template('course/certificate_requests.html', **context)
+    else:
+        flash(notify_danger('Unauthorised attempt!'))
+        return redirect(url_for('course.index'))
+
+
+@course_blueprint.route("/certificate/<certif_req_id>/approve", methods=['GET', 'POST'])
+@login_required
+def approve_certif_req(certif_req_id):
+    certif_request = CertificateRequest.query.get(certif_req_id)
+    course_taker_id = certif_request.course_taker_id
+    course_id = certif_request.course_id
+    certif_request.delete()
+    certif = Certificate(
+        course_taker_id=course_taker_id,
+        course_id=course_id
+        )
+    certif.insert()
+
+    person = User.query.get(course_taker_id)
+    course = Course.query.get(course_id)
+    person_name = person.name.replace(' ', '_').replace('-', '_')
+    course_name = course.name.replace(' ', '_')
+    #flash(notify_info('{}'.format(os.getcwd())))
+    
+    try:
+        fname = "static/certificates/{}_{}.pdf".format(person_name, course_name)
+        with open(fname, 'w+') as f:
+            f.write('')
+        c = canvas.Canvas(fname)
+        init_y = 250
+        c.drawString(100, init_y,"Certificate Awarded To")
+        init_y -= 20
+        c.drawString(100, init_y, person.name)
+        init_y -= 20
+        c.drawString(100, init_y,"For")
+        init_y -= 20
+        c.drawString(100, init_y, course.name)
+        init_y -= 20
+        c.drawString(100, init_y, "On")
+        init_y -= 20
+        datetime_now = datetime.datetime.now()
+        datenow = '{} - {} - {}'.format(
+            datetime_now.year, 
+            datetime_now.month, 
+            datetime_now.day)
+        c.drawString(100, init_y, datenow)
+        c.save()
+    except Exception as e:
+        flash(notify_danger('{}'.format(e)))
+    return redirect(url_for('course.view_certificate_request'))
+
+
+@course_blueprint.route("/certificate/<certif_req_id>/decline", methods=['GET', 'POST'])
+@login_required
+def decline_certif_req(certif_req_id):
+    certif_request = CertificateRequest.query.get(certif_req_id)
+    course_taker_id = certif_request.course_taker_id
+    course_id = certif_request.course_id
+    certif_request.delete()
+    return redirect(url_for('course.view_certificate_request'))

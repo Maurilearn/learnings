@@ -1,0 +1,46 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+
+<table class="table">
+    <thead>
+        <th>
+            Name
+        </th>
+        <th>
+            Course
+        </th>
+        <th>
+            
+        </th>
+    </thead>
+    <tbody>
+        {%for cert_request in certif_requests%}
+
+            {%set course_taker = User.query.get(cert_request.course_taker_id) %}
+            {%set course = Course.query.get(cert_request.course_id) %}
+        <tr>
+            <td>{{course_taker.name}}</td>
+            <td>{{course.name}}</td>
+            <td>
+                <a href="{{url_for('course.approve_certif_req', certif_req_id=cert_request.id)}}"
+                    class="btn btn-success">approve</a>
+                <a href="{{url_for('course.decline_certif_req', certif_req_id=cert_request.id)}}"
+                    class="btn btn-danger">decline</a>
+            </td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+
+
+{% endblock %}

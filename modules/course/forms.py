@@ -41,8 +41,9 @@ class AddSectionForm(FlaskForm):
             }
         )
 
+# chapter
 class AddSubSectionForm(FlaskForm):
-    name = StringField('Sub section Name', [
+    name = StringField('Chapter Name', [
         DataRequired()
         ],
         render_kw={

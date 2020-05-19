@@ -16,9 +16,8 @@ def add_admin(name, email, password, role):
             role=role
         )
         admin.set_hash(password)
-        db.session.add(admin)
-        db.session.commit()
-
+        admin.insert()
+        print('[x] added admin:', name, email, password, role)
 '''
 def add_setting(name, value):
     with app.app_context():

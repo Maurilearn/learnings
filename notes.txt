@@ -7,10 +7,12 @@ eg. save successful
 
 [x] course subscription
 
-[ ] quiz passing 50% pass
+[x] quiz passing 50% pass
 
 [ ] on course completion notify teacher by mail
-[ ] teacher approve
+[x] teacher approve
 [ ] student gets certificate of completion (pdf)
 
 [ ] homework mechanism
+
+[x] header and footer + login tweark

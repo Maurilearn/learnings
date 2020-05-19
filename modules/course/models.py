@@ -57,6 +57,8 @@ class Section(db.Model):
         nullable=False)
     quizzes = db.relationship('Quiz', backref='section', lazy=True,
         cascade="all, delete, delete-orphan")
+    quiz_histories = db.relationship('QuizHistory', backref='section', lazy=True,
+        cascade="all, delete, delete-orphan")
     sub_sections = db.relationship('SubSection', backref='section', lazy=True,
         cascade="all, delete, delete-orphan")
 
@@ -117,6 +119,9 @@ class Resource(db.Model):
 
 
 class QuizHistory(db.Model):
+    '''
+    section quiz completed
+    '''
     __tablename__ = 'quiz_histories'
     id = db.Column(db.Integer, primary_key=True)
     person_id = db.Column(db.Integer, db.ForeignKey('users.id'),
@@ -147,6 +152,47 @@ class ChapterHistory(db.Model):
         nullable=False)
     completed = db.Column(db.Boolean, default=True,
         nullable=True)
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class CertificateRequest(db.Model):
+    __tablename__ = 'certificate_requests'
+    id = db.Column(db.Integer, primary_key=True)
+    course_taker_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+        nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'),
+        nullable=False)
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class Certificate(db.Model):
+    __tablename__ = 'certificates'
+    id = db.Column(db.Integer, primary_key=True)
+    course_taker_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+        nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'),
+        nullable=False)
+    date_given = db.Column(db.DateTime, default=datetime.now())
 
     def insert(self):
         db.session.add(self)

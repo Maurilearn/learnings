@@ -79,6 +79,12 @@ def initialise():
         config["user"]["password"],
         config["user"]["role"]
     )
+    add_admin(
+        'John Doe',
+        'jdoe@gmail.com',
+        'pass',
+        'admin'
+    )
 
     '''
     print("Initialising Settings")

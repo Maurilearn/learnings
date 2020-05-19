@@ -6,11 +6,14 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import flash
+
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
+
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
+from shopyoapi.enhance import base_context
 
 
 auth_blueprint = Blueprint(
@@ -22,8 +25,10 @@ auth_blueprint = Blueprint(
 
 @auth_blueprint.route("/login")
 def login():
+    context = base_context()
     form = LoginForm()
-    return render_template('auth/login.html', form=form)
+    context['form'] = form
+    return render_template('auth/login.html', **context)
 
 
 @auth_blueprint.route("/logout")

@@ -3,6 +3,7 @@ from shopyoapi.init import db
 from flask_login import UserMixin
 
 from modules.course.models import Course
+from modules.course.models import QuizHistory
 
 course_subs = db.Table('course_subs',
     db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
@@ -20,6 +21,9 @@ class User(UserMixin, db.Model):
     courses = db.relationship("Course",
         secondary=course_subs, 
         cascade = "all, delete")# !subs- teacher, students
+
+    quiz_histories = db.relationship('QuizHistory', backref='person', lazy=True,
+        cascade="all, delete, delete-orphan")
 
     def set_hash(self, password):
         self.password = generate_password_hash(password, method="sha256")

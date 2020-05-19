@@ -1,0 +1,4 @@
+reportlab
+flask_sqlalchemy
+flask_migrate
+flask_upload

@@ -13,25 +13,29 @@
 <br>
 <h2></h2>
 
+<h3>Quiz for section: {{section.name}}</h3><br>
+
 <form action="{{url_for('course.check_quiz', section_id=section.id)}}" method="POST">
 
 {%for quiz in section.quizzes%}
-    Q: {{quiz.question}}
+    <h5> Q: {{quiz.question}} </h5>
     <table class="">
         <tbody>
             {%for answer in quiz.answers%}
-                <tr>
-                    <td>
-                        <input type="checkbox" name="quiz_{{quiz.id}}_answer_{{answer.id}}">
-                    </td>
-                    <td>
-                        {{answer.string}}
+                <tr class="form-group">
+                    <td class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input"
+                        name="quiz_{{quiz.id}}_answer_{{answer.id}}" id="answer-{{answer.id}}">
+                         <label class="custom-control-label" for="answer-{{answer.id}}">
+                            {{answer.string}}
+                          </label>
                     </td>
                 </tr>
+
             {%endfor%}
         </tbody>
     </table>
-    
+    <hr>
 {%endfor%}
     <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
     <input type="submit" name="" value="submit" class="btn btn-info">

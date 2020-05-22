@@ -2,8 +2,9 @@
 eg. save successful
 
 [x] quiz tied to subsection
-[ ] quiz unlocked after notes
 [x] one subsection 10 quiz
+[ ] edit quiz
+[ ] shuffle quiz
 
 [x] course subscription
 
@@ -11,8 +12,24 @@ eg. save successful
 
 [ ] on course completion notify teacher by mail
 [x] teacher approve
-[ ] student gets certificate of completion (pdf)
-
-[ ] homework mechanism
+[x] student gets certificate of completion (pdf)
 
 [x] header and footer + login tweark
+
+
+[ ] homework submit for student
+[ ] teacher review (for contacting student by mail)
+[ ] student sees if homework was accepted or being processed
+
+[ ] add app settings (location, mail, name, number)
+
+[ ] copyright page
+
+[ ] profile page for students and teachers
+
+
+TODO
+
+[ ] decide on nice filename
+[x] add filename in certificates table
+[ ] add mechanism for admin to view filename

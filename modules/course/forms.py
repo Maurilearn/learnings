@@ -8,7 +8,11 @@ from wtforms.validators import DataRequired
 from wtforms.validators import Length
 from wtforms.validators import Email
 from wtforms import TextAreaField
+from flask_wtf.file import FileField
+from flask_wtf.file import FileAllowed
+from flask_wtf.file import FileRequired
 
+from shopyoapi.init import docs
 
 class AddCourseForm(FlaskForm):
     name = StringField('Name', [
@@ -65,6 +69,23 @@ class AddTextForm(FlaskForm):
         render_kw={
                 "rows": 20,
                 "class": "form-control"
+            }
+        )
+    submit = SubmitField('Submit',
+        render_kw={
+            'class':'btn btn-info'
+            }
+        )
+
+
+class AddHomeworkForm(FlaskForm):
+    homework_doc = FileField('Homework doc', validators=[
+        FileAllowed(docs, 'Doc must be a pdf, docx or odf'),
+        FileRequired('File was empty!')
+        ],
+        render_kw={
+            'class':'form-control',
+            'autocomplete':'off',
             }
         )
     submit = SubmitField('Submit',

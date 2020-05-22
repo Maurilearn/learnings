@@ -3,8 +3,13 @@ import os
 
 from flask import Flask, redirect, send_from_directory
 
-from shopyoapi.init import db, login_manager, ma
+from shopyoapi.init import db
+from shopyoapi.init import login_manager
+from shopyoapi.init import ma
+
 from shopyoapi.init import photos
+from shopyoapi.init import docs
+
 from config import app_config
 from flask_wtf.csrf import CSRFProtect
 from modules.auth.models import User
@@ -21,6 +26,7 @@ def create_app(config_name):
     
     
     configure_uploads(app, photos)
+    configure_uploads(app, docs)
 
     login_manager.init_app(app)
     login_manager.login_view = configuration.LOGIN_VIEW

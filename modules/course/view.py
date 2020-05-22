@@ -9,11 +9,13 @@ from .models import Resource
 from .models import QuizHistory
 from .models import CertificateRequest
 from .models import Certificate
+from .models import Homework
 
 from modules.course.forms import AddCourseForm
 from modules.course.forms import AddSectionForm
 from modules.course.forms import AddSubSectionForm
 from modules.course.forms import AddTextForm
+from modules.course.forms import AddHomeworkForm
 
 from flask import Blueprint
 from flask import url_for
@@ -31,6 +33,7 @@ from flask_login import current_user
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
 from shopyoapi.init import fake
+from shopyoapi.init import docs
 from shopyoapi.enhance import base_context
 
 from userapi.renders import render_md
@@ -217,6 +220,42 @@ def view_subsection(subsection_id):
     return render_template('course/view_subsection.html', **context)
 
 
+@course_blueprint.route("/subsection/<subsection_id>/add/homework", methods=['GET', 'POST'])
+@login_required
+def subsection_add_homework(subsection_id):
+    context = base_context()
+    context['form'] = AddHomeworkForm()
+    context['subsection'] = SubSection.query.get(subsection_id)
+    return render_template('course/add_homework.html', **context)
+
+def flash_errors(form):
+    """Flashes form errors"""
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ), 'error')
+
+@course_blueprint.route("/subsection/<subsection_id>/add/homework/check", methods=['GET', 'POST'])
+@login_required
+def subsection_add_homework_check(subsection_id):
+    form = AddHomeworkForm()
+
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            subsection = SubSection.query.get(subsection_id)
+            filename = docs.save(request.files['homework_doc'])
+            subsection.homeworks.append(Homework(filename=filename))
+            subsection.update()
+            flash('New recipe added')
+        else:
+            flash_errors(form)
+            flash('ERROR! Recipe was not added.')
+    return redirect(url_for('course.subsection_add_homework', subsection_id=subsection_id))
+
+
 @course_blueprint.route("/subsection/<subsection_id>/add/text")
 @login_required
 def subsection_add_text(subsection_id):
@@ -347,6 +386,11 @@ def unsubscribe(course_id):
     flash(notify_warning('Unsubscribed from {}!'.format(course.name)))
     return redirect(url_for('course.mycourses'))
 
+#
+# Certificates
+#
+
+
 @course_blueprint.route("/<course_id>/certificate/request", methods=['GET', 'POST'])
 @login_required
 def certificate_request(course_id):
@@ -398,7 +442,7 @@ def approve_certif_req(certif_req_id):
         course_taker_id=course_taker_id,
         course_id=course_id
         )
-    certif.insert()
+    
 
     person = User.query.get(course_taker_id)
     course = Course.query.get(course_id)
@@ -407,10 +451,13 @@ def approve_certif_req(certif_req_id):
     #flash(notify_info('{}'.format(os.getcwd())))
     
     try:
-        fname = "static/certificates/{}_{}.pdf".format(person_name, course_name)
+        dirname = "static/certificates/"
+        filename = "{}_{}.pdf".format(person_name, course_name)
+        fname = dirname+filename
         with open(fname, 'w+') as f:
             f.write('')
         c = canvas.Canvas(fname)
+        c.setTitle("Certificate")
         init_y = 250
         c.drawString(100, init_y,"Certificate Awarded To")
         init_y -= 20
@@ -429,6 +476,8 @@ def approve_certif_req(certif_req_id):
             datetime_now.day)
         c.drawString(100, init_y, datenow)
         c.save()
+        certif.filename = filename
+        certif.insert()
     except Exception as e:
         flash(notify_danger('{}'.format(e)))
     return redirect(url_for('course.view_certificate_request'))
@@ -442,3 +491,7 @@ def decline_certif_req(certif_req_id):
     course_id = certif_request.course_id
     certif_request.delete()
     return redirect(url_for('course.view_certificate_request'))
+
+#
+# Homework
+#

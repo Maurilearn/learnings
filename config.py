@@ -10,8 +10,9 @@ class Config:
     LOGIN_MESSAGE = "Please login for access"
 
     UPLOADED_PHOTOS_DEST = 'static/img' 
-    UPLOADS_DEFAULT_URL = 'http://localhost:5000/'
     UPLOADED_PHOTOS_ALLOW = ('png', 'jpg', 'jpeg')
+    UPLOADED_DOCS_DEST = 'static/uploads/docs' 
+    UPLOADED_DOCS_ALLOW = ('pdf', 'docx', 'odf')
 
 
 class DevelopmentConfig(Config):

@@ -83,6 +83,8 @@ class SubSection(db.Model):
         nullable=False)
     resources = db.relationship('Resource', backref='sub_section', lazy=True,
         cascade="all, delete, delete-orphan")
+    homeworks = db.relationship('Homework', backref='sub_section', lazy=True,
+        cascade="all, delete, delete-orphan")
 
     def insert(self):
         db.session.add(self)
@@ -94,6 +96,25 @@ class SubSection(db.Model):
     def delete(self):
         db.session.delete(self)
         db.session.commit()
+
+class Homework(db.Model):
+    __tablename__ = 'homeworks'
+    id = db.Column(db.Integer, primary_key=True)
+    subsection_id = db.Column(db.Integer, db.ForeignKey('sub_sections.id'),
+        nullable=False)
+    filename = db.Column(db.String(100)) # uploads/homework/
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 
 
 class Resource(db.Model):
@@ -193,6 +214,50 @@ class Certificate(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'),
         nullable=False)
     date_given = db.Column(db.DateTime, default=datetime.now())
+    filename = db.Column(db.String(100))
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class HomeworkSubmission(db.Model):
+    __tablename__ = 'homework_submissions'
+    id = db.Column(db.Integer, primary_key=True)
+    course_taker_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+        nullable=False)
+    subsection_id = db.Column(db.Integer, db.ForeignKey('sub_sections.id'),
+        nullable=False)
+    filename = db.Column(db.String(100))
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class HomeworkEvaluation(db.Model):
+    __tablename__ = 'homework_evaluations'
+    id = db.Column(db.Integer, primary_key=True)
+    course_taker_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+        nullable=False)
+    subsection_id = db.Column(db.Integer, db.ForeignKey('sub_sections.id'),
+        nullable=False)
+    notes = db.Column(db.String(100))
+    filename = db.Column(db.String(100))
 
     def insert(self):
         db.session.add(self)

@@ -33,6 +33,9 @@
 <a class="btn btn-info" 
   href="">
   <i class="fa fa-file"></i> Add file</a>
+<a class="btn btn-info"
+  href="{{url_for('course.subsection_add_homework', subsection_id=subsection.id)}}">
+  <i class="fa fa-plus"></i> Add Homework</a>
 {%endif%}
 
 <br><br>
@@ -44,6 +47,15 @@
     {%if resource.type == 'text'%}
         {{ render_md(resource.text) | safe }}
     {%endif%}
+{%endfor%}
+
+<h4>Homeworks</h4>
+
+
+
+<br>
+{%for hwork in subsection.homeworks%}
+    <a href="{{url_for('static', filename='uploads/docs/'+hwork.filename) }}">homework file {{loop.index}}</a>
 {%endfor%}
 
 <script src="/static/highlightjs/highlight.pack.js"></script>

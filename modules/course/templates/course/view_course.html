@@ -28,11 +28,8 @@ Course completed.
     {%elif not certificate_approved(course.id)%}
         <a class="btn btn-success" href="{{url_for('course.certificate_request', course_id=course.id)}}">Request Certificate</a>
     {%elif certificate_approved(course.id)%}
-        {%set person_name = current_user.name.replace(' ', '_').replace('-', '_')%}
-        {%set course_name = course.name.replace(' ', '_').replace('-', '_')%}
-        {%set certif_path = person_name+'_'+course_name%}
         <a class="btn btn-info" 
-        href="/static/certificates/{{certif_path}}.pdf"><i class="fa fa-search"></i> view certificate</a>
+        href="{{url_for('cdn.certificate', course_id=course.id)}}"><i class="fa fa-search"></i> view certificate</a>
     {%endif%}
 
 {%endif%}

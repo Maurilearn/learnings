@@ -1,6 +1,7 @@
 
 from modules.auth.models import User
 from modules.course.models import Certificate
+from modules.course.models import Course
 
 from flask import Blueprint
 from flask import render_template
@@ -28,5 +29,7 @@ def index(user_id):
     finished = Certificate.query.filter(
             Certificate.course_taker_id == user.id
         ).all()
-    context['num_finished'] = len(finished)
+    context['num_completed'] = len(finished)
+    num_available = len(Course.query.all())
+    context['num_available'] = num_available
     return render_template('profile/index.html', **context)

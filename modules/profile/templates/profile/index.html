@@ -3,7 +3,7 @@
 
 
 {% block pagehead %}
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 {% endblock %}
 
 
@@ -16,7 +16,7 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            
+            <canvas id="pie-chart" width="100" height="100"></canvas>
         </div>
         <div class="col">
             <table class="table">
@@ -35,11 +35,11 @@
                     </tr>
                     <tr>
                         <td><i class="fa fa-chalkboard"></i></td>
-                        <td style="font-style: capitalize;">{{num_enrolled}}</td>
+                        <td style="font-style: capitalize;">{{num_enrolled}}/{{num_available}}</td>
                     </tr>
                     <tr>
                         <td><i class="fa fa-certificate"></i></td>
-                        <td style="font-style: capitalize;">{{num_finished}}</td>
+                        <td style="font-style: capitalize;">{{num_completed}}</td>
                     </tr>
                 </tbody>
             </table>
@@ -47,4 +47,27 @@
     </div>
 </div>
 
+<script type="text/javascript">
+
+new Chart(document.getElementById("pie-chart"), {
+    type: 'pie',
+    data: {
+      labels: ["To complete","Enrolled", "Completed"],
+      datasets: [{
+        label: "Population (millions)",
+        backgroundColor: ["#c45850", "#8e5ea2", "#3cba9f"],
+        data: [{{num_available-(num_completed+num_enrolled)}}, {{num_enrolled}}, {{num_completed}}]
+      }]
+    },
+    options: {
+      title: {
+        display: true,
+        text: 'Courses ({{num_available}})'
+      }
+    }
+});
+
+$('#pie-chart').css("width", "500");
+$('#pie-chart').css("height", "500");
+</script>
 {% endblock %}

@@ -1,0 +1,50 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%set active_page='profile'%}
+{%include 'course/partials/nav.html'%}
+<br>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            
+        </div>
+        <div class="col">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td><i class="fab fa-pied-piper-hat"></i></td>
+                        <td>{{user.name}}</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fa fa-envelope"></i></td>
+                        <td>{{user.email}}</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fa fa-coffee"></i></td>
+                        <td style="font-style: capitalize;">{{user.role}}</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fa fa-chalkboard"></i></td>
+                        <td style="font-style: capitalize;">{{num_enrolled}}</td>
+                    </tr>
+                    <tr>
+                        <td><i class="fa fa-certificate"></i></td>
+                        <td style="font-style: capitalize;">{{num_finished}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

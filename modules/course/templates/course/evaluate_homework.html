@@ -1,0 +1,69 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%set active_page = 'evaluate_homeworks'%}
+{%include 'course/partials/nav.html'%}
+<br>
+
+<a class="btn btn-info" 
+    href="{{url_for('course.view_homework_submissions')}}">
+    <i class="fa fa-arrow-left"></i>
+</a>
+
+<br><br>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Info</th>
+      <th>User</th>
+      <th>File</th>
+    </tr>
+  </thead>
+  <tbody>
+      {%set course_taker = User.query.get(submission.course_taker_id) %}
+      <tr>
+        <td>
+        Course: {{submission.sub_section.section.course.name}}<br>
+        Section: {{submission.sub_section.section.name}}<br>
+        Chapter: {{submission.sub_section.name}}
+        <td>
+        {{course_taker.name}} ({{course_taker.email}})
+        </td>
+        <td>
+            <a 
+                class="btn btn-info" 
+                href="{{url_for('cdn.homework_submitted', submission_id=submission.id)}}">
+                <i class="fa fa-file-download"></i>
+            </a>
+        </td>
+      </tr>
+  </tbody>
+</table>
+
+<form 
+    action="{{url_for('course.evaluate_homework_submission_check', submission_id=submission.id)}}" 
+    method="POST" >
+
+<div class="form-field">
+{{ form.notes.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-book"></i></span>
+    </div>
+    {{ form.notes }}
+</div>
+
+{{ form.submit }}
+{{ form.csrf_token }}
+</form>
+
+{% endblock %}

@@ -8,6 +8,7 @@
 
 
 {% block content %}
+{%set active_page = 'manage_students'%}
 {%include 'course/partials/nav.html'%}
 {%for message in messages%}
         {{message}}
@@ -90,5 +91,5 @@
         </div>
     </div>
 </div>
-
+</div>
 {% endblock %}

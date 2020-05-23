@@ -1,0 +1,48 @@
+
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%set active_page = 'evaluate_homeworks'%}
+{%include 'course/partials/nav.html'%}
+
+<br>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Info</th>
+      <th>User</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {%for submission in submissions%}
+      {%set course_taker = User.query.get(submission.course_taker_id) %}
+      <tr>
+        <td>
+        Course: {{submission.sub_section.section.course.name}}<br>
+        Section: {{submission.sub_section.section.name}}<br>
+        Chapter: {{submission.sub_section.name}}
+        <td>
+        {{course_taker.name}} ({{course_taker.email}})
+        </td>
+        <td>
+          <a 
+            class="btn btn-info" 
+            href="{{url_for('course.evaluate_homework_submission', submission_id=submission.id)}}">
+            Evaluate
+          </a>
+        </td>
+      </tr>
+    {%endfor%}
+  </tbody>
+</table>
+
+{% endblock %}

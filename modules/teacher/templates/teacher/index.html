@@ -8,84 +8,83 @@
 
 
 {% block content %}
+{%set active_page = 'manage_teachers'%}
 {%include 'course/partials/nav.html'%}
 <br>
 <div class="row">
     <div class="col-sm-9">
-<table class="table ">
-    <thead>
-        <tr>
-          <th scope="col">Name</th>
-          <th scope="col">Email</th>
-          <th scope="col">Pass</th>
-          <th></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {%for teacher in teachers%}
-        <tr>
-          <form action="{{url_for('teacher.edit', teacher_id=teacher.id)}}" method="POST">
-            <td><input name="teacher_name"
-                  class="form-control" value="{{teacher.name}}"></td>
-            <td><input name="teacher_email"
-                  class="form-control" value="{{teacher.email}}"></td>
-            <td><input name="teacher_password" 
-                  class="form-control" value=""></td>
-            <td><input class="btn btn-info" type="submit" value="save"></td>
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-          </form>
-          <td><a 
-                class="btn btn-danger" 
-                href="{{url_for('teacher.delete', teacher_id=teacher.id)}}">delete</a></td>
-        </tr>
-        {%endfor%}
-      </tbody>
-</table>
-    </div>
+      <table class="table ">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+              <th scope="col">Pass</th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {%for teacher in teachers%}
+            <tr>
+              <form action="{{url_for('teacher.edit', teacher_id=teacher.id)}}" method="POST">
+                <td><input name="teacher_name"
+                      class="form-control" value="{{teacher.name}}"></td>
+                <td><input name="teacher_email"
+                      class="form-control" value="{{teacher.email}}"></td>
+                <td><input name="teacher_password" 
+                      class="form-control" value=""></td>
+                <td><input class="btn btn-info" type="submit" value="save"></td>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              </form>
+              <td><a 
+                    class="btn btn-danger" 
+                    href="{{url_for('teacher.delete', teacher_id=teacher.id)}}">delete</a></td>
+            </tr>
+            {%endfor%}
+          </tbody>
+      </table>
+    </div><!--col sm 9 -->
     <div class="col-sm-3">
         <div class="card">
           <div class="card-header">
             Add Teacher
           </div>
           <div class="card-body">
+            <form action="{{url_for('teacher.add_check')}}" method="POST">
+              <div class="form-field">
+              {{ form.name.label }} <br>
+              <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fa fa-key"></i></span>
+                  </div>
+                  {{ form.name }}
+              </div>
 
-<form action="{{url_for('teacher.add_check')}}" method="POST">
+              <div class="form-field">
+              {{ form.email.label }} <br>
+              <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fa fa-key"></i></span>
+                  </div>
+                  {{ form.email }}
+              </div>
 
-<div class="form-field">
-{{ form.name.label }} <br>
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text"><i class="fa fa-key"></i></span>
-    </div>
-    {{ form.name }}
-</div>
+              <div class="form-field">
+              {{ form.password.label }} <br>
+              <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                      <span class="input-group-text"><i class="fa fa-key"></i></span>
+                  </div>
+                  {{ form.password }}
+              </div>
 
-<div class="form-field">
-{{ form.email.label }} <br>
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text"><i class="fa fa-key"></i></span>
-    </div>
-    {{ form.email }}
-</div>
-
-<div class="form-field">
-{{ form.password.label }} <br>
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text"><i class="fa fa-key"></i></span>
-    </div>
-    {{ form.password }}
-</div>
-
-{{ form.submit }}
-{{ form.csrf_token }}
-</form>
+              {{ form.submit }}
+              {{ form.csrf_token }}
+            </form>
 
           </div>
         </div>
-    </div>
+    </div><!--col sm 3-->
 </div>
-
+</div>
 {% endblock %}

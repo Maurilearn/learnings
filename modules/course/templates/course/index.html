@@ -8,6 +8,7 @@
 
 
 {% block content %}
+{%set active_page = 'manage_course'%}
 {%include 'course/partials/nav.html'%}
 <br>
 <a class="" href="{{url_for('course.add')}}">Add Course</a> |

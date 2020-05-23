@@ -12,7 +12,9 @@ class Config:
     UPLOADED_PHOTOS_DEST = 'static/img' 
     UPLOADED_PHOTOS_ALLOW = ('png', 'jpg', 'jpeg')
     UPLOADED_DOCS_DEST = 'static/uploads/docs' 
-    UPLOADED_DOCS_ALLOW = ('pdf', 'docx', 'odf')
+    UPLOADED_DOCS_ALLOW = ('pdf', 'docx', 'odt')
+    UPLOADED_HOMEWORKSUBMITS_DEST = 'static/uploads/homework_submits' 
+    UPLOADED_HOMEWORKSUBMITS_ALLOW = ('pdf', 'docx', 'odt')
 
 
 class DevelopmentConfig(Config):

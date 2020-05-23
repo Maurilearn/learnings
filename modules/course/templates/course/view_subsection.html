@@ -12,6 +12,7 @@
 
 
 {% block content %}
+{%set active_page='my_courses'%}
 {%include 'course/partials/nav.html'%}
 <br>
 {% set section = subsection.section%}
@@ -41,9 +42,20 @@
 <br><br>
 
 {%for resource in subsection.resources%}
-    
-    <a class="badge badge-info" href="">edit</a> 
-    <a class="badge badge-danger" href="{{url_for('course.resource_delete', resource_id=resource.id)}}">delete</a><br>
+      
+    {%if current_user.id == subsection.section.course.teacher_id or current_user.role == 'admin'%}
+    <a
+      class="badge badge-info" 
+      href="">
+      edit
+    </a> 
+    <a
+      class="badge badge-danger" 
+      href="{{url_for('course.resource_delete', resource_id=resource.id)}}">
+      delete
+    </a>
+    {%endif%}
+    <br>
     {%if resource.type == 'text'%}
         {{ render_md(resource.text) | safe }}
     {%endif%}
@@ -55,8 +67,67 @@
 
 <br>
 {%for hwork in subsection.homeworks%}
-    <a href="{{url_for('static', filename='uploads/docs/'+hwork.filename) }}">homework file {{loop.index}}</a>
+    <a href="{{url_for('cdn.homework', hwork_id=hwork.id) }}">{{hwork.filename}}</a> <br>
 {%endfor%}
+<br>
+
+<h4>Submit homework</h4>
+
+<form 
+  action="{{url_for('course.subsection_submit_homework_check', subsection_id=subsection.id)}}"
+  method="POST" 
+  enctype="multipart/form-data">
+
+<div class="form-field">
+{{ submit_hwork_form.homework_submit.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-book"></i></span>
+    </div>
+    {{ submit_hwork_form.homework_submit }}
+</div>
+
+{{ submit_hwork_form.submit }}
+{{ submit_hwork_form.csrf_token }}
+</form>
+
+<br><br>
+
+<div class="card">
+  <div class="card-header">
+    Homework Submitted
+  </div>
+  <div class="card-body">
+    {%for submission in user_homeworks_submitted%}
+      <a 
+        class="btn btn-info" 
+        href="{{url_for('cdn.homework_submitted', submission_id=submission.id)}}">
+        <i class="fa fa-file-download"></i>
+      </a>
+      {{submission.filename}}
+      <hr>
+    {%endfor%}
+  </div>
+</div>
+
+<br>
+
+<div class="card">
+  <div class="card-header">
+    Homework Evaluated
+  </div>
+  <div class="card-body">
+    {%for evaluation in user_homeworks_evaluated%}
+      <a 
+        class="btn btn-info" 
+        href="{{url_for('cdn.homework_evaluated', evaluation_id=evaluation.id)}}">
+        <i class="fa fa-file-download"></i>
+      </a>
+      {{evaluation.filename}} <b>Note:</b> "{{evaluation.notes}}"
+      <hr>
+    {%endfor%}
+  </div>
+</div>
 
 <script src="/static/highlightjs/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>

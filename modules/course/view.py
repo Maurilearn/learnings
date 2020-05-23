@@ -10,12 +10,16 @@ from .models import QuizHistory
 from .models import CertificateRequest
 from .models import Certificate
 from .models import Homework
+from .models import HomeworkSubmission
+from .models import HomeworkEvaluation
 
-from modules.course.forms import AddCourseForm
-from modules.course.forms import AddSectionForm
-from modules.course.forms import AddSubSectionForm
-from modules.course.forms import AddTextForm
-from modules.course.forms import AddHomeworkForm
+from .forms import AddCourseForm
+from .forms import AddSectionForm
+from .forms import AddSubSectionForm
+from .forms import AddTextForm
+from .forms import AddHomeworkForm
+from .forms import SubmitHomeworkForm
+from .forms import AddHomeworkNoteForm
 
 from flask import Blueprint
 from flask import url_for
@@ -34,6 +38,7 @@ from shopyoapi.init import db
 from shopyoapi.init import login_manager
 from shopyoapi.init import fake
 from shopyoapi.init import docs
+from shopyoapi.init import homeworksubmits
 from shopyoapi.enhance import base_context
 
 from userapi.renders import render_md
@@ -41,7 +46,7 @@ from userapi.html import notify_danger
 from userapi.html import notify_success
 from userapi.html import notify_info
 from userapi.html import notify_warning
-
+from userapi.forms import flash_errors
 from modules.quiz.models import Quiz
 from modules.quiz.models import Answer
 
@@ -217,6 +222,16 @@ def view_subsection(subsection_id):
     context['subsection'] = subsection
     context['render_md'] = render_md
     context['course'] = subsection.section.course
+    submit_hwork_form = SubmitHomeworkForm()
+    context['submit_hwork_form'] = submit_hwork_form
+    context['user_homeworks_submitted'] = HomeworkSubmission.query.filter(
+        (HomeworkSubmission.course_taker_id == current_user.id) &
+        (HomeworkSubmission.subsection_id == subsection_id)
+        ).all()
+    context['user_homeworks_evaluated'] = HomeworkEvaluation.query.filter(
+        (HomeworkEvaluation.course_taker_id == current_user.id) &
+        (HomeworkEvaluation.subsection_id == subsection_id)
+        ).all()
     return render_template('course/view_subsection.html', **context)
 
 
@@ -228,14 +243,7 @@ def subsection_add_homework(subsection_id):
     context['subsection'] = SubSection.query.get(subsection_id)
     return render_template('course/add_homework.html', **context)
 
-def flash_errors(form):
-    """Flashes form errors"""
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(u"Error in the %s field - %s" % (
-                getattr(form, field).label.text,
-                error
-            ), 'error')
+
 
 @course_blueprint.route("/subsection/<subsection_id>/add/homework/check", methods=['GET', 'POST'])
 @login_required
@@ -246,14 +254,37 @@ def subsection_add_homework_check(subsection_id):
     if request.method == 'POST':
         if form.validate_on_submit():
             subsection = SubSection.query.get(subsection_id)
-            filename = docs.save(request.files['homework_doc'])
+            filename = docs.save(request.files[form.homework_doc.data.name])
             subsection.homeworks.append(Homework(filename=filename))
             subsection.update()
-            flash('New recipe added')
+            # flash(notify_info(form.homework_doc.data.name))
+            flash(notify_success('Homework file uploaded'))
         else:
             flash_errors(form)
             flash('ERROR! Recipe was not added.')
     return redirect(url_for('course.subsection_add_homework', subsection_id=subsection_id))
+
+
+@course_blueprint.route("/subsection/<subsection_id>/submit/homework/check", methods=['GET', 'POST'])
+@login_required
+def subsection_submit_homework_check(subsection_id):
+    form = SubmitHomeworkForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            subsection = SubSection.query.get(subsection_id)
+            filename = homeworksubmits.save(request.files[form.homework_submit.data.name])
+            subsection.homework_submissions.append(
+                HomeworkSubmission(
+                    filename=filename,
+                    course_taker_id=current_user.id)
+                )
+            subsection.update()
+            # flash(notify_info(form.homework_doc.data.name))
+            flash(notify_success('Homework file submitted!'))
+        else:
+            flash_errors(form)
+    return redirect(url_for('course.view_subsection', subsection_id=subsection_id))
+
 
 
 @course_blueprint.route("/subsection/<subsection_id>/add/text")
@@ -435,6 +466,9 @@ def view_certificate_request():
 @login_required
 def approve_certif_req(certif_req_id):
     certif_request = CertificateRequest.query.get(certif_req_id)
+    course = Course.query.get(certif_request.course_id)
+    if not (current_user.id == course.teacher_id or current_user.role == 'admin'):
+        return "You don't have permission to approve"
     course_taker_id = certif_request.course_taker_id
     course_id = certif_request.course_id
     certif_request.delete()
@@ -495,3 +529,55 @@ def decline_certif_req(certif_req_id):
 #
 # Homework
 #
+
+@course_blueprint.route("/homework/submissions", methods=['GET', 'POST'])
+@login_required
+def view_homework_submissions():
+    context = base_context()
+    if current_user.role == 'admin':
+        submissions = HomeworkSubmission.query.all()
+    else:
+        submissions = []
+        for submission in HomeworkSubmission.query.all():
+            subsection = SubSection.query.get(submission.subsection_id)
+            teacher_id = submission.sub_section.section.course.teacher_id
+            if current_user.id == teacher_id:
+                submissions.append(submission)
+    context['submissions'] = submissions
+    context['User'] = User
+    return render_template('course/view_submissions.html', **context)
+
+
+@course_blueprint.route("/homework/submission/<submission_id>/evaluate", methods=['GET', 'POST'])
+@login_required
+def evaluate_homework_submission(submission_id):
+    context = base_context()
+    context['submission'] = HomeworkSubmission.query.get(submission_id)
+    context['User'] = User
+    form = AddHomeworkNoteForm()
+    context['form'] = form
+    return render_template('course/evaluate_homework.html', **context)
+
+
+@course_blueprint.route("/homework/submission/<submission_id>/evaluate/check", methods=['GET', 'POST'])
+@login_required
+def evaluate_homework_submission_check(submission_id):
+    if request.method == 'POST':
+        form = AddHomeworkNoteForm()
+        if form.validate_on_submit():
+            submission = HomeworkSubmission.query.get(submission_id)
+            course_taker_id = submission.course_taker_id
+            subsection_id = submission.subsection_id
+            notes = form.notes.data
+            hwork_eval = HomeworkEvaluation(
+                course_taker_id=course_taker_id,
+                subsection_id=subsection_id,
+                notes=notes,
+                filename=submission.filename
+                )
+
+            submission.delete()
+            hwork_eval.insert()
+        else:
+            flash_errors(form)
+        return redirect(url_for('course.view_homework_submissions'))

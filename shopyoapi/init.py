@@ -11,3 +11,4 @@ fake = Faker()
 
 photos = UploadSet('photos', IMAGES)
 docs = UploadSet('docs', DOCUMENTS)
+homeworksubmits = UploadSet('homeworksubmits', DOCUMENTS)

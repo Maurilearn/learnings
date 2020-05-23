@@ -93,3 +93,34 @@ class AddHomeworkForm(FlaskForm):
             'class':'btn btn-info'
             }
         )
+
+class SubmitHomeworkForm(FlaskForm):
+    homework_submit = FileField('Homework doc', validators=[
+        FileAllowed(docs, 'Doc must be a pdf, docx or odf'),
+        FileRequired('File was empty!')
+        ],
+        render_kw={
+            'class':'form-control',
+            'autocomplete':'off',
+            }
+        )
+    submit = SubmitField('Submit',
+        render_kw={
+            'class':'btn btn-info'
+            }
+        )
+
+class AddHomeworkNoteForm(FlaskForm):
+    notes = StringField('Notes', [
+        DataRequired()
+        ],
+        render_kw={
+                "class": "form-control",
+                "autocomplete": "off"
+            }
+        )
+    submit = SubmitField('Submit',
+        render_kw={
+            'class':'btn btn-info'
+            }
+        )

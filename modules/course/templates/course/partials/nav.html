@@ -1,31 +1,50 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
       {%if current_user.role == 'admin'%}
-      <li class="nav-item active">
-        <a class="nav-link" href="{{url_for('course.index')}}">Manage Course</a>
+      <li class="nav-item {{ 'app-active' if active_page == 'manage_course' else '' }}">
+        <a class="nav-link"
+           href="{{url_for('course.index')}}">Manage Course</a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="{{url_for('teacher.index')}}">Manage Teachers</a>
+      <li class="nav-item {{ 'app-active' if active_page == 'manage_teachers' else '' }}">
+        <a class="nav-link"
+           href="{{url_for('teacher.index')}}">Manage Teachers</a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="{{url_for('student.index')}}">Manage Students</a>
+      <li class="nav-item {{ 'app-active' if active_page == 'manage_students' else '' }}">
+        <a class="nav-link"
+           href="{{url_for('student.index')}}">Manage Students</a>
       </li>
       {%endif%}
       {%if current_user.role in ['admin', 'teacher']%}
-        <li class="nav-item active">
-          <a class="nav-link" href="{{url_for('course.view_certificate_request')}}">Certificate Requests</a>
+        <li class="nav-item {{ 'app-active' if active_page == 'certificate_requests' else '' }}">
+          <a class="nav-link"
+           href="{{url_for('course.view_certificate_request')}}">Certificate Requests</a>
+        </li>
+        <li class="nav-item {{ 'app-active' if active_page == 'evaluate_homeworks' else '' }}">
+          <a class="nav-link"
+           href="{{url_for('course.view_homework_submissions')}}">Evaluate Homeworks</a>
         </li>
       {%endif%}
-      <li class="nav-item active">
-        <a class="nav-link" href="{{url_for('course.list')}}">Available Courses</a>
+      <li class="nav-item {{ 'app-active' if active_page == 'available_courses' else '' }}">
+        <a class="nav-link"
+           href="{{url_for('course.list')}}">Available Courses</a>
       </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="{{url_for('course.mycourses')}}">My Courses</a>
+      <li class="nav-item {{ 'app-active' if active_page == 'my_courses' else '' }}">
+        <a class="nav-link"
+           href="{{url_for('course.mycourses')}}">My Courses</a>
       </li>
 
-      <li class="nav-item active">
-        <a class="nav-link" href="{{url_for('auth.logout')}}">logout</a>
+      <li class="nav-item {{ 'app-active' if active_page == 'profile' else '' }}">
+        <a class="nav-link"
+           href="{{url_for('profile.index', user_id=current_user.id)}}">My Profile</a>
+      </li>
+      <li class="nav-item {{ 'app-active' if active_page == '' else '' }}">
+        <a class="nav-link"
+           href="{{url_for('auth.logout')}}">logout</a>
       </li>
     </ul>
   </div>

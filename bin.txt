@@ -1,40 +1,20 @@
-<form 
-  action="" 
-  method="POST" 
-  enctype="multipart/form-data">
-
-<div class="form-field">
-{{ form.homework_submit.label }} <br>
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text"><i class="fa fa-book"></i></span>
-    </div>
-    {{ form.homework_submit }}
-</div>
-
-
-{{ form.submit }}
-{{ form.csrf_token }}
-</form>
-
-
-@course_blueprint.route("/subsection/<subsection_id>/add/homework/check", methods=['GET', 'POST'])
-@login_required
-def subsection_add_homework_check(subsection_id):
-    # flash(notify_info(dir(form.homework_submit.data)))
-    # ['__bool__', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', 
-    # '__format__', '__ge__', '__getattr__', '__getattribute__', '__gt__', '__hash__', 
-    # '__init__', '__init_subclass__', '__iter__', '__le__', '__lt__', '__module__', '__ne__',
-    #  '__new__', '__nonzero__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', 
-    # '__sizeof__', '__str__', '__subclasshook__', '__weakref__', '_parse_content_type', 
-    # 'close', 'content_length', 'content_type', 'filename', 'headers', 'mimetype', 'mimetype_params', 
-    # 'name', 'save', 'stream']
-    form = SubmitHomeworkForm()
-
-
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            flash(notify_info(form.homework_submit.data.name))
-        else:
-            flash_errors(form)
-    return redirect(url_for('course.subsection_add_homework', subsection_id=subsection_id))
+<script type="text/javascript">
+    
+        var quizes = 
+        {
+            {%for quiz in section.quizzes%}
+            {
+                "question":"{{quiz.question}}",
+                "answers":
+                [
+                    {%for answer in quiz.answers%}
+                        {
+                            "string":"{{answer.string}}",
+                            "correct":{{answer.correct}}
+                        },
+                    {%endfor%}
+                ]
+            },
+            {%endfor%}
+        }
+</script>

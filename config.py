@@ -16,12 +16,24 @@ class Config:
     UPLOADED_HOMEWORKSUBMITS_DEST = 'static/uploads/homework_submits' 
     UPLOADED_HOMEWORKSUBMITS_ALLOW = ('pdf', 'docx', 'odt')
 
+    SMTP_HOST = ''
+    SMTP_PORT = 458
+    SMTP_MAIN_MAIL = ''
+    SMTP_PASS = ''
+
 
 class DevelopmentConfig(Config):
     """Configurations for development"""
 
     ENV = "development"
     DEBUG = True
+    # SMTP_HOST = 'localhost'
+    # SMTP_PORT = 1025
+    # SMTP_MAIN_MAIL = 'dev@maurilearn.com'
+    SMTP_HOST = 'smtp.gmail.com'
+    SMTP_PORT = 587
+    SMTP_MAIN_MAIL = 'arj.message@gmail.com'
+    SMTP_PASS = 'berry654321'
 
 
 class TestingConfig(Config):
@@ -29,6 +41,10 @@ class TestingConfig(Config):
 
     SQLALCHEMY_DATABASE_URI = "sqlite:///testing.db"
     DEBUG = True
+    SMTP_HOST = ''
+    SMTP_PORT = 458
+    SMTP_MAIN_MAIL = ''
+    SMTP_PASS = ''
 
 
 app_config = {

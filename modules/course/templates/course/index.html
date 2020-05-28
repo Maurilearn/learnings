@@ -8,11 +8,14 @@
 
 
 {% block content %}
-{%set active_page = 'manage_course'%}
+{%set active_page = 'manage'%}
 {%include 'course/partials/nav.html'%}
 <br>
-<a class="" href="{{url_for('course.add')}}">Add Course</a> |
-<a class="" href="{{url_for('course.add')}}">Add For Others</a>
+<a class="btn btn-info" href="{{url_for('course.add')}}">Add Course</a>
+
+{%if current_user.role == 'admin'%}
+<a class="btn btn-info" href="{{url_for('course.add')}}">Add For Others</a>
+{%endif%}
 <br>
 <h1>Courses</h1>
 <table class="table">
@@ -31,14 +34,12 @@
         <td>{{teacher.name}}</td>
         <td>
             <a class="btn btn-info" href="{{url_for('course.view', course_id=course.id)}}">
-                <i class="fa fa-search"></i>
+                <i class="fa fa-book"></i>
             </a> 
-            <a class="btn btn-danger" href="">
+            <a class="btn btn-danger" href="{{url_for('course.delete_check', course_id=course.id)}}"
+                onClick="return confirm('Are you sure you wish to delete?');">
                 <i class="fa fa-trash"></i>
             </a> 
-            <a class="btn btn-warning" href="">
-                <i class="fa fa-pen"></i>
-            </a>
         </td>
     </tr>
 {%endfor%}

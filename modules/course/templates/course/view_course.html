@@ -12,25 +12,62 @@
 {%set active_page='my_courses'%}
 {%include 'course/partials/nav.html'%}
 <br>
-<h2>{{course.name}} by {{author.name}}</h2>
+
+
 
 {%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
-<div><a class="btn btn-info" 
+
+<form
+    method="POST"
+    action="{{url_for('course.edit_check', course_id=course.id)}}"
+>
+<div class="form-group row">
+    <label for="course_name" class="col-sm-2 col-form-label">
+        <b>Author:{{author.name}}</b></label>
+    <div class="col-sm-8">
+      <input type="text" class="form-control" id="course_name" 
+        value="{{course.name}}" name="course_name"> 
+    </div>
+    <input type="hidden" value="{{csrf_token()}}" name="csrf_token">
+    <input 
+    style="color: #fff;" 
+    type="submit"
+    class="btn btn-info col-sm-2 form-control"
+    value="Save name">
+
+</div>
+</form>
+
+<div>
+<a 
+    class="btn btn-info" 
     href="{{url_for('course.add_section', course_id=course.id)}}">
-    <i class="fa fa-plus"></i> Add section</a></div>
+    <i class="fa fa-plus"></i> Add section
+</a>
+<a 
+    class="btn btn-danger" 
+    href=""
+    onClick="return confirm('Are you sure you wish to delete?');">
+    <i class="fa fa-trash"></i> Delete
+</a>
+
+</div>
+{%else%}
+<h2>{{course.name}} by {{author.name}}</h2>
 {%endif%}
 
+<br>
 {%if course_completed(course.id)%}
 
 Course completed. 
     
-    {%if certificate_requested(course.id)%}
+    {%if certificate_approved(course.id)%}
+        <a class="btn btn-info" 
+        href="{{url_for('cdn.certificate', course_id=course.id)}}"><i class="fa fa-search"></i> view certificate</a>
+    {%elif certificate_requested(course.id)%}
         Certificate being processed
     {%elif not certificate_approved(course.id)%}
         <a class="btn btn-success" href="{{url_for('course.certificate_request', course_id=course.id)}}">Request Certificate</a>
-    {%elif certificate_approved(course.id)%}
-        <a class="btn btn-info" 
-        href="{{url_for('cdn.certificate', course_id=course.id)}}"><i class="fa fa-search"></i> view certificate</a>
     {%endif%}
 
 {%endif%}
@@ -39,11 +76,41 @@ Course completed.
 {%for section in course.sections%}
     <div class="card">
         <div class="card-header">
-            <b>{{section.name}}</b> &nbsp;&nbsp;&nbsp;
+            
 
             {%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
-            <a class="btn btn-info" href="{{url_for('course.add_subsection', section_id=section.id)}}">Add chapter</a> 
-            <a class="btn btn-danger" href="{{url_for('course.delete_section', section_id=section.id)}}">delete</a>
+            <form
+                method="POST"
+                action="{{url_for('course.edit_section_check', section_id=section.id)}}"
+            >
+            <div class="form-group row">
+                <div class="col-sm-8">
+                  <input type="text" class="form-control"
+                    value="{{section.name}}" name="section_name"> 
+                </div>
+                <input type="hidden" value="{{csrf_token()}}" name="csrf_token">
+                <input 
+                style="color: #fff;" 
+                type="submit"
+                class="btn btn-info col-sm-2 form-control"
+                value="Save">
+
+            </div>
+            </form>
+            <a class="btn btn-info" href="{{url_for('course.add_subsection', section_id=section.id)}}">
+                Add chapter
+            </a> 
+            <a class="btn btn-danger" href="{{url_for('course.delete_section', section_id=section.id)}}"
+                onClick="return confirm('Are you sure you wish to delete?');">
+                delete
+            </a>
+            <a class="btn btn-warning" 
+            href="{{url_for('course.edit_quiz', section_id=section.id)}}">
+                edit quiz
+            </a>
+
+            {%else%}
+            <b>{{section.name}}</b> &nbsp;&nbsp;&nbsp;
             {%endif%}
 
         </div>

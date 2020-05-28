@@ -1,6 +1,7 @@
 from modules.auth.models import User
 
 from modules.teacher.forms import AddTeacherForm
+from modules.auth.access import roles_required
 
 from flask import Blueprint
 from flask import url_for
@@ -31,6 +32,8 @@ teacher_blueprint = Blueprint(
 
 
 @teacher_blueprint.route("/")
+@roles_required(['admin'])
+@login_required
 def index():
     context = base_context()
     context['teachers'] = User.query.filter(
@@ -41,6 +44,8 @@ def index():
     return render_template('teacher/index.html', **context)
 
 @teacher_blueprint.route("/add/check", methods=['GET', 'POST'])
+@roles_required(['admin'])
+@login_required
 def add_check():
     if request.method == 'POST':
         context = base_context()
@@ -60,6 +65,8 @@ def add_check():
 
 
 @teacher_blueprint.route("/edit/<teacher_id>", methods=['GET', 'POST'])
+@roles_required(['admin'])
+@login_required
 def edit(teacher_id):
     if request.method == 'POST':
         teacher = User.query.get(teacher_id)
@@ -73,6 +80,8 @@ def edit(teacher_id):
 
 
 @teacher_blueprint.route("/delete/<teacher_id>", methods=['GET', 'POST'])
+@roles_required(['admin'])
+@login_required
 def delete(teacher_id):
     teacher = User.query.get(teacher_id)
     teacher.delete()

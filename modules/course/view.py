@@ -2,6 +2,8 @@ import datetime
 import os
 
 from modules.auth.models import User
+from modules.auth.access import roles_required
+
 from .models import Course
 from .models import Section
 from .models import SubSection
@@ -34,6 +36,9 @@ from flask_login import login_user
 from flask_login import logout_user
 from flask_login import current_user
 
+from modules.quiz.models import Quiz
+from modules.quiz.models import Answer
+
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
 from shopyoapi.init import fake
@@ -47,8 +52,7 @@ from userapi.html import notify_success
 from userapi.html import notify_info
 from userapi.html import notify_warning
 from userapi.forms import flash_errors
-from modules.quiz.models import Quiz
-from modules.quiz.models import Answer
+from userapi.email import send_mail
 
 from reportlab.pdfgen import canvas
 
@@ -63,15 +67,23 @@ course_blueprint = Blueprint(
 
 
 @course_blueprint.route("/")
+@roles_required(['admin', 'teacher'])
 @login_required
 def index():
     context = base_context()
     # context['courses'] = [fake.paragraph(nb_sentences=1) for i in range(5)]
     context['User'] = User
-    context['courses'] = Course.query.all()
+    if current_user.role == 'admin':
+        courses = Course.query.all()
+    else:
+        courses = Course.query.filter(
+            (Course.teacher_id==current_user.id)
+            ).all()
+    context['courses'] = courses
     return render_template('course/index.html', **context)
 
 @course_blueprint.route("/add")
+@roles_required(['admin', 'teacher'])
 @login_required
 def add():
     context = base_context()
@@ -80,6 +92,7 @@ def add():
 
 
 @course_blueprint.route("/add/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def add_check():
     context = base_context()
@@ -91,6 +104,34 @@ def add_check():
             )
         course.insert()
     return redirect(url_for('course.add'))
+
+@course_blueprint.route("/<course_id>/delete/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def delete_check(course_id):
+    context = base_context()
+    course = Course.query.get(course_id)
+    if current_user.id == course.teacher_id or current_user.role == 'admin':
+        course.delete()
+    else:
+        flash(notify_danger('No permission to delete'))
+    return redirect(url_for('course.index'))
+
+
+@course_blueprint.route("/<course_id>/edit/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def edit_check(course_id):
+    if request.method == 'POST':
+        context = base_context()
+        course = Course.query.get(course_id)
+        if current_user.id == course.teacher_id or current_user.role == 'admin':
+            course.name = request.form['course_name']
+            course.update()
+        else:
+            return 'No permission to edit'
+        return redirect(url_for('course.view', course_id=course_id))
+
 
 @course_blueprint.route("/view/<course_id>", methods=['GET', 'POST'])
 @login_required
@@ -155,6 +196,7 @@ def view(course_id):
     return render_template('course/view_course.html', **context)
 
 @course_blueprint.route("/<course_id>/add/section")
+@roles_required(['admin', 'teacher'])
 @login_required
 def add_section(course_id):
     context = base_context()
@@ -166,6 +208,7 @@ def add_section(course_id):
 
 
 @course_blueprint.route("/<course_id>/add/section/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def add_section_check(course_id):
     if request.method == 'POST':
@@ -186,6 +229,7 @@ def add_section_check(course_id):
         return jsonify({"submission": "ok"})
 
 @course_blueprint.route("/section/<section_id>/delete")
+@roles_required(['admin', 'teacher'])
 @login_required
 def delete_section(section_id):
     section = Section.query.get(section_id)
@@ -194,7 +238,49 @@ def delete_section(section_id):
     flash(notify_danger('Deleted section {}!'.format(section.name)))
     return redirect(url_for('course.view', course_id=course_id))
 
+@course_blueprint.route("/section/<section_id>/edit/check", methods=['POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def edit_section_check(section_id):
+    if request.method == 'POST':
+        section = Section.query.get(section_id)
+        course_id = section.course.id
+        course = Course.query.get(course_id)
+        if current_user.id == course.teacher_id or current_user.role == 'admin':
+            section.name = request.form['section_name']
+            section.update()
+        else:
+            return 'No permission to edit'
+        return redirect(url_for('course.view', course_id=course_id))
+
+
+@course_blueprint.route("/section/<section_id>/quiz/edit", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def edit_quiz(section_id):
+    '''
+    var init_json_submit = {
+            "csrf":csrf_token,
+            "section_name": "",
+            "quizes":{
+                
+            }
+        }
+        /*answer {"string":"", "correct":""}*/
+        var empty_quiz = {
+            "question":"",
+            "answers":[
+                
+            ]
+        }
+    '''
+    context = base_context()
+    context['section'] = Section.query.get(section_id)
+    return render_template('course/edit_quiz.html', **context)
+
+
 @course_blueprint.route("/section/<section_id>/add/subsection")
+@roles_required(['admin', 'teacher'])
 @login_required
 def add_subsection(section_id):
     context = base_context()
@@ -205,6 +291,7 @@ def add_subsection(section_id):
 
 
 @course_blueprint.route("/section/<section_id>/add/subsection/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def add_subsection_check(section_id):
     if request.method == 'POST':
@@ -261,7 +348,7 @@ def subsection_add_homework_check(subsection_id):
             flash(notify_success('Homework file uploaded'))
         else:
             flash_errors(form)
-            flash('ERROR! Recipe was not added.')
+            flash('ERROR! Homework')
     return redirect(url_for('course.subsection_add_homework', subsection_id=subsection_id))
 
 
@@ -288,6 +375,7 @@ def subsection_submit_homework_check(subsection_id):
 
 
 @course_blueprint.route("/subsection/<subsection_id>/add/text")
+@roles_required(['admin', 'teacher'])
 @login_required
 def subsection_add_text(subsection_id):
     context = base_context()
@@ -298,6 +386,7 @@ def subsection_add_text(subsection_id):
 
 
 @course_blueprint.route("/subsection/<subsection_id>/add/text/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def subsection_add_text_check(subsection_id):
     if request.method == 'POST':
@@ -308,6 +397,7 @@ def subsection_add_text_check(subsection_id):
         return redirect(url_for('course.subsection_add_text', subsection_id=subsection_id))
 
 @course_blueprint.route("/resource/<resource_id>/delete", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def resource_delete(resource_id):
     resource = Resource.query.get(resource_id)
@@ -437,36 +527,44 @@ def certificate_request(course_id):
             )
         cert_req.insert()
         flash(notify_success('Certificate requested!'))
+        course = Course.query.get(course_id)
+        teacher = User.query.get(course.teacher_id)
+        subject = 'MAURILEARN: {} requested certificate'.format(current_user.email)
+        body = 'Greetings <br> User {} ({}) requested certificate'.format(current_user.name, current_user.email)
+        send_mail(teacher.email, subject, body)
     return redirect(url_for('course.view', course_id=course_id))
 
 @course_blueprint.route("/view/certificate/request", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def view_certificate_request():
-    if current_user.role in ['admin', 'teacher']:
-        context = base_context()
-        if current_user.role == 'admin':
-            certif_requests = CertificateRequest.query.all()
-            context['certif_requests'] = certif_requests
-        else:
-            c_requests = []
-            for cert_request_item in CertificateRequest.query.all():
-                course = Course.query.get(cert_request_item.course_id)
-                if course.teacher_id == current_user.id:
-                    c_requests.append(cert_request_item)
-            context['certif_requests'] = c_requests
-        context['User'] = User
-        context['Course'] = Course
-        return render_template('course/certificate_requests.html', **context)
+    context = base_context()
+    if current_user.role == 'admin':
+        certif_requests = CertificateRequest.query.all()
+        context['certif_requests'] = certif_requests
     else:
-        flash(notify_danger('Unauthorised attempt!'))
-        return redirect(url_for('course.index'))
+        c_requests = []
+        for cert_request_item in CertificateRequest.query.all():
+            course = Course.query.get(cert_request_item.course_id)
+            if course.teacher_id == current_user.id:
+                c_requests.append(cert_request_item)
+        context['certif_requests'] = c_requests
+    context['User'] = User
+    context['Course'] = Course
+    return render_template('course/certificate_requests.html', **context)
+
 
 
 @course_blueprint.route("/certificate/<certif_req_id>/approve", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def approve_certif_req(certif_req_id):
     certif_request = CertificateRequest.query.get(certif_req_id)
     course = Course.query.get(certif_request.course_id)
+    if not course:
+        flash(notify_warning('Course no longer exist'))
+        certif_request.delete()
+        return redirect(url_for('course.view_certificate_request'))
     if not (current_user.id == course.teacher_id or current_user.role == 'admin'):
         return "You don't have permission to approve"
     course_taker_id = certif_request.course_taker_id
@@ -523,6 +621,13 @@ def decline_certif_req(certif_req_id):
     certif_request = CertificateRequest.query.get(certif_req_id)
     course_taker_id = certif_request.course_taker_id
     course_id = certif_request.course_id
+    course = Course.query.get(course_id)
+    if not course:
+        flash(notify_warning('Course no longer exist'))
+        certif_request.delete()
+        return redirect(url_for('course.view_certificate_request'))
+    if not (current_user.id == course.teacher_id or current_user.role == 'admin'):
+        return "You don't have permission to approve"
     certif_request.delete()
     return redirect(url_for('course.view_certificate_request'))
 
@@ -531,6 +636,7 @@ def decline_certif_req(certif_req_id):
 #
 
 @course_blueprint.route("/homework/submissions", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def view_homework_submissions():
     context = base_context()
@@ -549,6 +655,7 @@ def view_homework_submissions():
 
 
 @course_blueprint.route("/homework/submission/<submission_id>/evaluate", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def evaluate_homework_submission(submission_id):
     context = base_context()
@@ -560,6 +667,7 @@ def evaluate_homework_submission(submission_id):
 
 
 @course_blueprint.route("/homework/submission/<submission_id>/evaluate/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
 @login_required
 def evaluate_homework_submission_check(submission_id):
     if request.method == 'POST':

@@ -1,4 +1,4 @@
-x[x] popup for operations
+[x] popup for operations
 eg. save successful
 
 [x] quiz tied to subsection
@@ -25,7 +25,7 @@ eg. save successful
 
 [ ] copyright page
 
-[ ] profile page for students and teachers
+[x] profile page for students and teachers
 
 
 TODO

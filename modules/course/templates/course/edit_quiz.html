@@ -1,0 +1,376 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%set active_page='my_courses'%}
+{%include 'course/partials/nav.html'%}
+<br>
+
+<div> <!--form beg-->
+
+    <input id="section-name" type="hidden" name="name" class="form-control"
+    value="{{section.name}}" >
+
+<div>
+    Quiz created: <span id="completed_quiz">0</span>/10<br>
+    <div id="progress-bar" class="progress">
+        <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div><br>
+</div>
+
+<div class="row">
+    <div class="col-sm-1">
+        <div class="btn btn-info" id="prev">prev</div>
+    </div>
+    <div class="col-sm-10" id="quiz-part">
+        <div class="form-field">
+            <label> Quizz <span id="quiz-number">1</span> Question </label>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fa fa-question"></i></span>
+                </div>
+                <input id= "question" type="text" name="question" autocomplete="off" class="form-control" required>
+            </div>
+        </div>
+        <h4>Answers </h4>
+        <button type="button" class="btn btn-info" id="answer-plus">
+            <i class="fa fa-plus"></i>
+        </button>
+        <button type="button" class="btn btn-info" id="answer-minus">
+            <i class="fa fa-minus"></i>
+        </button>
+        <br><br>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Correct?</th>
+                    <th>Option</th>
+                </tr>
+            </thead>
+            <tbody id="tbody">
+                <tr id="row_1">
+                    <td><input type="checkbox" name="correct_1" class=""></td>
+                    <td><input type="text" name="answer_1" class="form-control"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-1">
+        <div class="btn btn-info" id="next">next</div>
+    </div>
+</div>
+
+
+
+<button id="submit" class="btn btn-info">Submit</button>
+<input id="csrf_token" name="csrf_token" type="hidden" value="">
+</div><!--form end-->
+
+<script type="text/javascript">
+    
+        var json_submit_data = {
+            "quizes":[
+                {%for quiz in section.quizzes%}
+                {
+                    "question":"{{quiz.question}}",
+                    "answers":[
+                        {%for answer in quiz.answers%}
+                            {
+                                "string":"{{answer.string}}",
+                                {%if answer.correct%}
+                                    "correct":true
+                                {%else%}
+                                    "correct":false
+                                {%endif%}
+                            },
+                        {%endfor%}
+                    ]
+                },
+                {%endfor%}
+            ]
+        };
+</script>
+<script type="text/javascript">
+function print() {
+    var sep = ' ';
+    var toprint = '';
+    for (var i = arguments.length - 1; i >= 0; i--) {
+        arg = arguments[arguments.length - i - 1];
+        if (typeof arg === 'string' || arg instanceof String) {
+
+        } else 
+        if(typeof arg == 'object'){
+            console.log(arg);
+            return
+        }
+        else {
+            arg = arg.toString();
+        }
+        toprint += arg + sep;
+    }
+    console.log(toprint);
+}
+</script>
+<script type="">
+$( document ).ready(function() {
+    print($('input'));
+    function verify_current_quiz(current_val){
+        if(current_val > 10){
+            current_val = 10;
+        }else
+        if (current_val < 1) {
+            current_val = 1;
+        }
+        return current_val;
+    }
+
+    function update_all(){
+        $("#quiz-number").html(current_quiz);
+    }
+    function get_num_empty_quiz(){
+        var count_quiz_empty = 0;
+        for (var i = 0; i < Object.keys(json_submit['quizes']).length; i++) {
+            var quest = json_submit['quizes'][(i+1).toString()]['question'];
+            if(quest.length === 0){
+                count_quiz_empty += 1;
+            }
+        }
+        return count_quiz_empty
+    }
+    function update_completed(){
+        var count_quiz_empty = 0;
+        for (var i = 0; i < Object.keys(json_submit['quizes']).length; i++) {
+            var quest = json_submit['quizes'][(i+1).toString()]['question'];
+            if(quest.length === 0){
+                count_quiz_empty += 1;
+            }
+        }
+        print(num_quiz, count_quiz_empty);
+        completed_quiz = num_quiz - count_quiz_empty;
+        $("#completed_quiz").html(completed_quiz);
+        var pbarval = (completed_quiz/num_quiz)*100;
+        $('.progress-bar').css('width', pbarval+'%').attr('aria-valuenow', pbarval);   
+    }
+    function input_val(selector){
+        return $(selector).val().trim();
+    }
+    function clear_quiz_inputs(){
+        $("input:checkbox").prop('checked', false);
+        $("#quiz-part input").prop('value', "");
+    }
+    function reinitialise_answer(){
+        $('[id^="row_"]').remove();
+        ansNum = 1;
+        row = '<tr id="row_'+ansNum.toString()+'">' +
+            '<td><input type="checkbox" name="correct_'+ansNum.toString()+'" class=""></td>'+
+            '<td><input type="text" name="answer_'+ansNum.toString()+'" class="form-control"></td>'+
+        '</tr>';
+        $('#tbody').append(row);
+    }
+
+    function clear_quiz(){
+        reinitialise_answer();
+        clear_quiz_inputs();
+    }
+    function init_json(num_quiz){
+        var init_json_submit = {
+            "csrf":csrf_token,
+            "section_name": "",
+            "quizes":{
+                
+            }
+        }
+        /*answer {"string":"", "correct":""}*/
+        var empty_quiz = {
+            "question":"",
+            "answers":[
+                
+            ]
+        }
+        for (var i = 1; i < num_quiz+1; i++) {
+            var copy_empty_quiz = JSON.parse(JSON.stringify(empty_quiz)); //avoid crazy refs
+            init_json_submit['quizes'][i.toString()] = copy_empty_quiz; //
+        }
+        return init_json_submit;
+    }
+    function not_quiz_empty(){
+        if ($('#question').val().trim() === ''){
+            alert('quiz question cannot be empty');
+            return false;
+        }
+        if($('[name^="correct_"]:checked').length === 0){
+            alert('at least one check box must be checked');
+            return false;
+        }
+        var empty = $('[name^="answer_"]').filter(function() {
+        return this.value === "";
+        });
+        print(empty.length);
+        if(empty.length) { //at least one empty
+            alert('all answer fields must be filled');
+            return false;
+        }
+        return true;
+    }
+    function not_section_name_empty(){
+        if ($('#section-name').val().trim() === ''){
+            alert('section name cannot be empty');
+            return false;
+        }
+        return true;
+    }
+    function update_json(){
+        json_submit['quizes'][current_quiz.toString()]['question'] = $('#question').val();
+        var count = 1;
+        json_submit['quizes'][current_quiz.toString()]['answers'] = [];
+        $('[id^="row_"]').each(function() {
+            json_submit['quizes'][current_quiz.toString()]['answers'].push({
+                "string":$('[name="answer_'+count.toString()+'"]').val(),
+                "correct":$('[name="correct_'+count.toString()+'"]').prop("checked")
+                });
+            count += 1;
+        });
+    }
+    function load_json(){
+        $('#question').val(json_submit['quizes'][current_quiz.toString()]['question']);
+        var answers = json_submit['quizes'][current_quiz.toString()]['answers'];
+        var qn = 1;
+        for (var i = 0; i < answers.length; i++) {
+            var ans = answers[i];
+            if(qn === 1){
+                $('[name="correct_'+qn.toString()+'"]').prop("checked", ans['correct']);
+                $('[name="answer_'+qn.toString()+'"]').val(ans['string']);
+            }else{
+                ansNum += 1;
+                row = '<tr id="row_'+ansNum.toString()+'">' +
+                    '<td><input type="checkbox" name="correct_'+ansNum.toString()+'" class=""></td>'+
+                    '<td><input type="text" name="answer_'+ansNum.toString()+'" class="form-control"></td>'+
+                '</tr>';
+                $('#tbody').append(row);
+                $('[name="correct_'+ansNum.toString()+'"]').prop("checked", ans['correct']);
+                $('[name="answer_'+ansNum.toString()+'"]').val(ans['string']);
+            }
+            qn += 1;
+        }
+    }
+    /*
+    "quizes":{
+    1:{
+        "question":"",
+        "answers":[
+            {"string":"", "correct":""}
+        ]
+    },
+    2:{
+        "question":"",
+        "answers":[
+            {"string":"", "correct":""}
+        ]
+    },
+    }
+    
+    */
+
+    var csrf_token = "{{csrf_token()}}";
+
+    var num_quiz = 10;
+    var completed_quiz = 0;
+    var current_quiz = 1;
+    // var json_submit = init_json(num_quiz);
+    var json_submit = json_submit_data;
+    print(json_submit);
+    $("#prev").click(function(){
+
+        
+        if(not_quiz_empty() & current_quiz !== 1){
+            update_json();
+            clear_quiz();
+            current_quiz -= 1;
+            current_quiz = verify_current_quiz(current_quiz);
+            update_all();
+            print(json_submit);
+            update_completed();
+            load_json();
+        }
+        
+    });
+    $("#next").click(function(){
+        
+        if(not_quiz_empty() & current_quiz !== 10){
+            update_json();
+            clear_quiz();
+            current_quiz += 1;
+            current_quiz = verify_current_quiz(current_quiz);
+            update_all();
+            print(json_submit);
+            update_completed();
+            load_json();
+        }
+
+    });
+    $("#submit").click(function(){
+        update_completed();
+        if(not_quiz_empty() & not_section_name_empty() & get_num_empty_quiz() <= 1){
+            // alert('ready to submit');
+            json_submit['section_name'] = $("#section-name").val().trim();
+            if(json_submit['quizes'][(10).toString()]['answers'].length === 0){
+                update_json();
+                update_completed();
+            }
+            $.ajax({
+
+                type: "POST",
+                url: "",
+                // The key needs to match your method's input parameter (case-sensitive).
+                data: JSON.stringify(json_submit),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function(data){
+                    // alert(data);
+                    window.location.reload();
+                    return false;
+                },
+                failure: function(errMsg) {
+                    alert(errMsg);
+                },
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{csrf_token()}}")
+                    }
+                }
+            });
+        }else{
+            alert('cannot submit');
+        }
+    });
+
+    /*quiz gui mechanism*/
+    var ansNum = 1;
+    $( "#answer-plus" ).click(function() {
+        ansNum += 1;
+        row = '<tr id="row_'+ansNum.toString()+'">' +
+            '<td><input type="checkbox" name="correct_'+ansNum.toString()+'" class=""></td>'+
+            '<td><input type="text" name="answer_'+ansNum.toString()+'" class="form-control"></td>'+
+        '</tr>';
+        $('#tbody').append(row);
+    });
+    
+    $(document).on('click','#answer-minus',function() {
+        if (ansNum > 1) {
+            
+            $('#row_'+ansNum.toString()).remove()
+            ansNum -= 1;
+        }
+    });
+
+/*end*/
+});
+</script>
+{% endblock %}

@@ -228,6 +228,38 @@ def add_section_check(course_id):
         course.update()
         return jsonify({"submission": "ok"})
 
+@course_blueprint.route("/section/<section_id>/quiz/edit/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def edit_quiz_check(section_id):
+    def json_safe(s):
+        return s.replace('"', '\\"').replace('\n', '\\n')
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            section = Section.query.get(section_id)
+            section.quizzes[:] = []
+            for quiz in data['quizes']:
+                question = data['quizes'][quiz]['question']
+                question = json_safe(question)
+                current_quiz = Quiz(question=question)
+                answers = data['quizes'][quiz]['answers']
+                for answer in answers:
+                    ans = answer['string']
+                    ans = json_safe(ans)
+                    current_quiz.answers.append(
+                        Answer(string=ans, correct=answer['correct']))
+                section.quizzes.append(current_quiz)
+            
+            section.update()
+            return jsonify({
+            "submission": "ok",
+            "go_to":url_for('course.view', course_id=section.course.id)})
+    except:
+        flash(notify_info(data))
+        return jsonify({
+            "submission": "bad"})
+
 @course_blueprint.route("/section/<section_id>/delete")
 @roles_required(['admin', 'teacher'])
 @login_required
@@ -275,7 +307,9 @@ def edit_quiz(section_id):
         }
     '''
     context = base_context()
-    context['section'] = Section.query.get(section_id)
+    section = Section.query.get(section_id)
+    context['section'] = section
+    context['course'] = section.course
     return render_template('course/edit_quiz.html', **context)
 
 

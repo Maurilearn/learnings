@@ -76,14 +76,15 @@
 <script type="text/javascript">
     
         var json_submit_data = {
-            "quizes":[
+            "section_name":"{{section.name}}",
+            "quizes":{
                 {%for quiz in section.quizzes%}
-                {
-                    "question":"{{quiz.question}}",
+                {{loop.index}}:{
+                    "question":"{{quiz.question | safe}}",
                     "answers":[
                         {%for answer in quiz.answers%}
                             {
-                                "string":"{{answer.string}}",
+                                "string":"{{answer.string.replace('"', '\\"') | safe}}",
                                 {%if answer.correct%}
                                     "correct":true
                                 {%else%}
@@ -94,7 +95,7 @@
                     ]
                 },
                 {%endfor%}
-            ]
+            }
         };
 </script>
 <script type="text/javascript">
@@ -231,10 +232,16 @@ $( document ).ready(function() {
         var count = 1;
         json_submit['quizes'][current_quiz.toString()]['answers'] = [];
         $('[id^="row_"]').each(function() {
+            print('current quiz', current_quiz)
             json_submit['quizes'][current_quiz.toString()]['answers'].push({
                 "string":$('[name="answer_'+count.toString()+'"]').val(),
                 "correct":$('[name="correct_'+count.toString()+'"]').prop("checked")
                 });
+            print('count', count)
+            print({
+                "string":$('[name="answer_'+count.toString()+'"]').val(),
+                "correct":$('[name="correct_'+count.toString()+'"]').prop("checked")
+                })
             count += 1;
         });
     }
@@ -259,6 +266,11 @@ $( document ).ready(function() {
             }
             qn += 1;
         }
+    }
+
+    function load_first_quiz(){
+        quiz = json_submit['quizes'][1]
+        $('#question').val(quiz['question']);
     }
     /*
     "quizes":{
@@ -285,7 +297,12 @@ $( document ).ready(function() {
     var current_quiz = 1;
     // var json_submit = init_json(num_quiz);
     var json_submit = json_submit_data;
+    // print(json_submit);
+    var ansNum = 1;
+    load_json();
     print(json_submit);
+
+
     $("#prev").click(function(){
 
         
@@ -298,7 +315,10 @@ $( document ).ready(function() {
             print(json_submit);
             update_completed();
             load_json();
+        }else if(current_quiz < 0){
+            current_quiz = 1;
         }
+        print(json_submit);
         
     });
     $("#next").click(function(){
@@ -313,9 +333,10 @@ $( document ).ready(function() {
             update_completed();
             load_json();
         }
-
+        print(json_submit);
     });
     $("#submit").click(function(){
+        print(json_submit);
         update_completed();
         if(not_quiz_empty() & not_section_name_empty() & get_num_empty_quiz() <= 1){
             // alert('ready to submit');
@@ -327,14 +348,14 @@ $( document ).ready(function() {
             $.ajax({
 
                 type: "POST",
-                url: "",
+                url: "{{url_for('course.edit_quiz_check', section_id=section.id)}}",
                 // The key needs to match your method's input parameter (case-sensitive).
                 data: JSON.stringify(json_submit),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function(data){
                     // alert(data);
-                    window.location.reload();
+                    window.location.replace(data['go_to']);
                     return false;
                 },
                 failure: function(errMsg) {

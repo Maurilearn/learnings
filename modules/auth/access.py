@@ -14,9 +14,12 @@ def roles_required(roles):
             #   return current_app.login_manager.unauthorized()
             #urole = current_app.login_manager.reload_user().get_urole()
             # if ( (urole != role) and (role != "ANY")):
-            if not current_user.role in roles:
-                # return current_app.login_manager.unauthorized()
-                return redirect(url_for('auth.login'))
+            if current_user.is_authenticated: # no () as we did not implement def is-authenticated in user model
+                if not current_user.role in roles:
+                    # return current_app.login_manager.unauthorized()
+                    return 'Unauthorised access'
+            else:
+                redirect(url_for('auth.login'))
 
             return fn(*args, **kwargs)
         return decorated_view

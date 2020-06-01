@@ -1,24 +1,29 @@
+# download python
 
+[download](https://www.python.org/downloads/)
 
-# initialise
-
-```
-python manage.py clean
-```
+# cloning
 
 ```
-python manage.py initialise
+git clone https://github.com/Abdur-rahmaanJ/learnings.git
 ```
 
-Add random students
+for push `git push origin master` as only one branch
+
+# install packages
+
+try on the commandline
+
 ```
-python manage.py populate
+python
 ```
 
-# Run server
+if command not ok, configure path
+
+then install packages
 
 ```
-python manage.py rundebug
+python -m pip install -r requirements.txt
 ```
 
 # Needed environment variables
@@ -56,3 +61,22 @@ change before initialising
       "name": "Abdur-Rahmaan Janhangeer"
     },
 ```
+
+# initialise
+
+
+```
+python manage.py initialise
+```
+
+Add random students and teachers
+```
+python manage.py populate
+```
+
+# Run server
+
+```
+python manage.py rundebug
+```
+

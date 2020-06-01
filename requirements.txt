@@ -4,3 +4,4 @@ flask_migrate
 flask_upload
 pymysql
 faker
+flask_script

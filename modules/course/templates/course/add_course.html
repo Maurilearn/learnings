@@ -10,6 +10,7 @@
 
 {% block content %}
 {%include 'course/partials/nav.html'%}
+{%set active_page = 'manage'%}
 <br>
 <a class="btn btn-info"
 	href="{{url_for('course.index')}}">

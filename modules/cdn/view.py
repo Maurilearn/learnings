@@ -3,6 +3,7 @@ from modules.course.models import Homework
 from modules.course.models import HomeworkSubmission
 from modules.course.models import HomeworkEvaluation
 from modules.course.models import SubSection
+from modules.course.models import Resource
 
 from flask import Blueprint
 from flask import send_from_directory
@@ -73,4 +74,13 @@ def homework_evaluated(evaluation_id):
                            evaluation.filename)
     else:
         return 'No permission to view file'
+
+
+@cdn_blueprint.route('/resource/video/<resource_id>', methods=["GET", "POST"])
+@login_required
+def resource_video(resource_id):
+    resource = Resource.query.get(resource_id)
+    return send_from_directory('static/uploads/video',
+                        as_attachment=True)
+    # as_attachment=True
 

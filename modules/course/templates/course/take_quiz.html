@@ -11,7 +11,10 @@
 {% block content %}
 {%include 'course/partials/nav.html'%}
 <br>
-<h2></h2>
+<a 
+class="btn btn-info"
+href="{{url_for('course.view', course_id=section.course.id)}}">back</a>
+<br><br>
 
 <h3>Quiz for section: {{section.name}}</h3><br>
 

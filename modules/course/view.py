@@ -30,6 +30,7 @@ from flask import render_template
 from flask import request
 from flask import flash
 from flask import jsonify
+from flask import current_app
 
 from flask_login import login_required
 from flask_login import login_user
@@ -54,9 +55,10 @@ from userapi.html import notify_warning
 from userapi.forms import flash_errors
 from userapi.email import send_mail
 
+from werkzeug import secure_filename
 from reportlab.pdfgen import canvas
-
-
+import random
+from sqlalchemy import func
 
 course_blueprint = Blueprint(
     "course",
@@ -133,6 +135,7 @@ def edit_check(course_id):
         return redirect(url_for('course.view', course_id=course_id))
 
 
+
 @course_blueprint.route("/view/<course_id>", methods=['GET', 'POST'])
 @login_required
 def view(course_id):
@@ -188,12 +191,50 @@ def view(course_id):
             return True
         return False
 
+    def eligible_to_display(course_id):
+        course = Course.query.get(course_id)
+        to_return = False
+
+        if len(course.sections) >= 1:
+            for section in course.sections:
+                if len(section.sub_sections) >= 1:
+                    to_return = True
+
+        return to_return
+    def has_at_least_one_section(course_id):
+        course = Course.query.get(course_id)
+        if (len(course.sections) >= 1):
+            return True
+        return False
+
+    if not eligible_to_display(course_id):
+        course.submitted = False
+
+    course.update()
+
     context['section_quiz_completed'] = section_quiz_completed
     context['course_completed'] = course_completed
     context['certificate_requested'] = certificate_requested
     context['certificate_approved'] = certificate_approved
+    context['eligible_to_display'] = eligible_to_display
+    context['has_at_least_one_section'] = has_at_least_one_section
 
     return render_template('course/view_course.html', **context)
+
+
+@course_blueprint.route("/<course_id>/submit", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def submit(course_id):
+    course = Course.query.get(course_id)
+    if current_user.id == course.teacher_id or current_user.role == 'admin':
+        course.submitted = True
+        course.update()
+        return redirect(url_for('course.view', course_id=course_id))
+    else:
+        flash(notify_danger('No permission to submit'))
+        return redirect(url_for('course.view', course_id=course_id))
+
 
 @course_blueprint.route("/<course_id>/add/section")
 @roles_required(['admin', 'teacher'])
@@ -206,7 +247,8 @@ def add_section(course_id):
     # context['form'] = AddSectionForm()
     return render_template('course/add_section.html', **context)
 
-
+def json_safe(s):
+    return s.replace('"', '\\"').replace('\n', '\\n')
 @course_blueprint.route("/<course_id>/add/section/check", methods=['GET', 'POST'])
 @roles_required(['admin', 'teacher'])
 @login_required
@@ -216,12 +258,13 @@ def add_section_check(course_id):
         section_name = data['section_name']
         section = Section(name=section_name)
         for quiz in data['quizes']:
-            question = data['quizes'][quiz]['question']
+            question = json_safe(data['quizes'][quiz]['question'])
             current_quiz = Quiz(question=question)
             answers = data['quizes'][quiz]['answers']
             for answer in answers:
+                ans = json_safe(answer['string'])
                 current_quiz.answers.append(
-                    Answer(string=answer['string'], correct=answer['correct']))
+                    Answer(string=ans, correct=answer['correct']))
             section.quizzes.append(current_quiz)
         course = Course.query.get(course_id)
         course.sections.append(section)
@@ -232,8 +275,7 @@ def add_section_check(course_id):
 @roles_required(['admin', 'teacher'])
 @login_required
 def edit_quiz_check(section_id):
-    def json_safe(s):
-        return s.replace('"', '\\"').replace('\n', '\\n')
+    
     try:
         if request.method == 'POST':
             data = request.get_json()
@@ -340,6 +382,7 @@ def add_subsection_check(section_id):
 def view_subsection(subsection_id):
     context = base_context()
     subsection = SubSection.query.get(subsection_id)
+
     context['subsection'] = subsection
     context['render_md'] = render_md
     context['course'] = subsection.section.course
@@ -359,8 +402,10 @@ def view_subsection(subsection_id):
 @course_blueprint.route("/subsection/<subsection_id>/add/homework", methods=['GET', 'POST'])
 @login_required
 def subsection_add_homework(subsection_id):
+    subsection = SubSection.query.get(subsection_id)
     context = base_context()
     context['form'] = AddHomeworkForm()
+    context['subsection'] = subsection
     context['subsection'] = SubSection.query.get(subsection_id)
     return render_template('course/add_homework.html', **context)
 
@@ -439,6 +484,51 @@ def resource_delete(resource_id):
     resource.delete()
     return redirect(url_for('course.view_subsection', subsection_id=subsection_id))
 
+@course_blueprint.route("/resource/<resource_id>/text/edit/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def resource_text_edit_check(resource_id):
+    if request.method == 'POST':
+        resource = Resource.query.get(resource_id)
+        subsection_id = resource.sub_section.id
+        resource.text = request.form['text_value']
+        resource.update()
+        return redirect(url_for('course.view_subsection', subsection_id=subsection_id))
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'mp4', 'avi'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@course_blueprint.route("/subsection/<subsection_id>/add/video/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def resource_add_video(subsection_id):
+    if request.method == 'POST':
+        subsection = SubSection.query.get(subsection_id)
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            resource = Resource(type='video', filename=filename)
+            subsection.resources.append(resource)
+            subsection.update()
+            file.save(os.path.join(current_app.config['UPLOAD_VIDEO_FOLDER'], filename))
+            return redirect(url_for('course.view_subsection',
+                                        subsection_id=subsection_id))
+    context = base_context()
+    context['subsection'] = SubSection.query.get(subsection_id)
+    return render_template('course/add_resource_vid.html', **context)
+
+
 @course_blueprint.route("/section/<section_id>/quiz", methods=['GET', 'POST'])
 @login_required
 def take_quiz(section_id):
@@ -447,6 +537,8 @@ def take_quiz(section_id):
     section = Section.query.get(section_id)
     course_id = section.course.id
     context['section'] = section
+    context['func'] = func
+    # https://stackoverflow.com/questions/60805/getting-random-row-through-sqlalchemy
     return render_template('course/take_quiz.html', **context)
 
 @course_blueprint.route("/section/<section_id>/quiz/check", methods=['GET', 'POST'])
@@ -500,7 +592,10 @@ def check_quiz(section_id):
 @login_required
 def list():
     context = base_context()
-    context['courses'] = Course.query.all()
+    display_courses = Course.query.filter(
+            (Course.submitted == True)
+        )
+    context['courses'] = display_courses
     context['User'] = User
     context['current_user'] = current_user
     return render_template('course/list.html', **context)
@@ -563,8 +658,10 @@ def certificate_request(course_id):
         flash(notify_success('Certificate requested!'))
         course = Course.query.get(course_id)
         teacher = User.query.get(course.teacher_id)
-        subject = 'MAURILEARN: {} requested certificate'.format(current_user.email)
-        body = 'Greetings <br> User {} ({}) requested certificate'.format(current_user.name, current_user.email)
+        subject = '{}: {} requested certificate'.format(current_app.config['APP_NAME'], 
+            current_user.email)
+        body = 'Greetings, <br> User {} ({}) requested certificate for course <br>{}'.format(
+            current_user.name, current_user.email, course.name)
         send_mail(teacher.email, subject, body)
     return redirect(url_for('course.view', course_id=course_id))
 

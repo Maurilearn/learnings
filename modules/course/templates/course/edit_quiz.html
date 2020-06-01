@@ -13,17 +13,25 @@
 {%include 'course/partials/nav.html'%}
 <br>
 
+
+<a 
+class="btn btn-info"
+href="{{url_for('course.view', course_id=section.course.id)}}">back</a>
+<br><br>
+
 <div> <!--form beg-->
 
     <input id="section-name" type="hidden" name="name" class="form-control"
     value="{{section.name}}" >
 
+<!--
 <div>
     Quiz created: <span id="completed_quiz">0</span>/10<br>
     <div id="progress-bar" class="progress">
         <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
     </div><br>
 </div>
+-->
 
 <div class="row">
     <div class="col-sm-1">
@@ -345,6 +353,7 @@ $( document ).ready(function() {
                 update_json();
                 update_completed();
             }
+            update_json();
             $.ajax({
 
                 type: "POST",

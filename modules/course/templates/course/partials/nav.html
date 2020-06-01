@@ -5,15 +5,17 @@
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      
+      {%if current_user.role == 'admin' or current_user.role == 'teacher'%}
       <li class="nav-item {{ 'app-active' if active_page == 'manage' else '' }} dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           Manage
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <div class="dropdown-divider"></div>
+            {%if current_user.role == 'teacher'%}
             <a class="nav-link"
                href="{{url_for('course.index')}}">Manage Course</a>
+            {%endif%}
             {%if current_user.role == 'admin'%}
             <a class="nav-link"
                href="{{url_for('teacher.index')}}">Manage Teachers</a>
@@ -22,8 +24,8 @@
             {%endif%}
         </div>
       </li>
-      
-      {%if current_user.role in ['admin', 'teacher']%}
+      {%endif%}
+      {%if current_user.role in ['teacher']%}
         <li class="nav-item {{ 'app-active' if active_page == 'certificate_requests' else '' }}">
           <a class="nav-link"
            href="{{url_for('course.view_certificate_request')}}">Certificate Requests</a>
@@ -32,7 +34,7 @@
           <a class="nav-link"
            href="{{url_for('course.view_homework_submissions')}}">Evaluate Homeworks</a>
         </li>
-      {%endif%}
+      
       <li class="nav-item {{ 'app-active' if active_page == 'available_courses' else '' }}">
         <a class="nav-link"
            href="{{url_for('course.list')}}">Available Courses</a>
@@ -42,10 +44,12 @@
            href="{{url_for('course.mycourses')}}">My Courses</a>
       </li>
 
+
       <li class="nav-item {{ 'app-active' if active_page == 'profile' else '' }}">
         <a class="nav-link"
            href="{{url_for('profile.index', user_id=current_user.id)}}">My Profile</a>
       </li>
+      {%endif%}
       <li class="nav-item {{ 'app-active' if active_page == '' else '' }}">
         <a class="nav-link"
            href="{{url_for('auth.logout')}}">logout</a>

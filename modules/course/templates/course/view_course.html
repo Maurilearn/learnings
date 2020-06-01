@@ -23,7 +23,7 @@
 >
 <div class="form-group row">
     <label for="course_name" class="col-sm-2 col-form-label">
-        <b>Author:{{author.name}}</b></label>
+        <b>Author:<br>{{author.name}}</b></label>
     <div class="col-sm-8">
       <input type="text" class="form-control" id="course_name" 
         value="{{course.name}}" name="course_name"> 
@@ -38,6 +38,10 @@
 </div>
 </form>
 
+Submitted courses can be accessed by users. 
+To be eligible to submit the course should have
+at least one section with at least one chapter
+<br>
 <div>
 <a 
     class="btn btn-info" 
@@ -50,6 +54,15 @@
     onClick="return confirm('Are you sure you wish to delete?');">
     <i class="fa fa-trash"></i> Delete
 </a>
+{%if eligible_to_display(course.id)%}
+    {%if course.submitted%}
+        <i style="color: green"  class="fa fa-check"></i> Ok submitted
+    {%else%}
+        <a class="btn btn-success" href="{{url_for('course.submit', course_id=course.id)}}">Submit</a>
+    {%endif%}
+{%else%}
+    Not eligible to submit
+{%endif%}
 
 </div>
 {%else%}
@@ -58,16 +71,19 @@
 
 <br>
 {%if course_completed(course.id)%}
-
-Course completed. 
     
-    {%if certificate_approved(course.id)%}
-        <a class="btn btn-info" 
-        href="{{url_for('cdn.certificate', course_id=course.id)}}"><i class="fa fa-search"></i> view certificate</a>
-    {%elif certificate_requested(course.id)%}
-        Certificate being processed
-    {%elif not certificate_approved(course.id)%}
-        <a class="btn btn-success" href="{{url_for('course.certificate_request', course_id=course.id)}}">Request Certificate</a>
+    {%if has_at_least_one_section(course.id)%}
+        {%if certificate_approved(course.id)%}
+            Course completed. 
+            <a class="btn btn-info" 
+            href="{{url_for('cdn.certificate', course_id=course.id)}}"><i class="fa fa-search"></i> view certificate</a>
+        {%elif certificate_requested(course.id)%}
+            Certificate being processed
+        {%elif not certificate_approved(course.id)%}
+            <a class="btn btn-success" href="{{url_for('course.certificate_request', course_id=course.id)}}">Request Certificate</a>
+        {%endif%}
+    {%else%}
+    Please add sections
     {%endif%}
 
 {%endif%}

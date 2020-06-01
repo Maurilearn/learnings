@@ -1,0 +1,27 @@
+
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%include 'course/partials/nav.html'%}
+<a class="btn btn-info" href="{{url_for('course.view_subsection', subsection_id=subsection.id)}}">back</a>
+<br>
+<br>
+
+<form 
+    class="" 
+    method=post enctype=multipart/form-data>
+      <input class="form-control" type=file name=file>
+      <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+      <br>
+      <input class="btn btn-info" type=submit value=Upload >
+    </form>
+</form>
+
+{% endblock %}

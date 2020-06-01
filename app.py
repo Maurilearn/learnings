@@ -2,7 +2,7 @@ import importlib
 import os
 
 from flask import Flask, redirect, send_from_directory
-
+import json
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
 from shopyoapi.init import ma
@@ -43,6 +43,7 @@ def create_app(config_name):
         mod = importlib.import_module("modules.{}.view".format(module))
         app.register_blueprint(getattr(mod, "{}_blueprint".format(module)))
 
+
     @app.route("/")
     def index():
         return redirect(configuration.HOMEPAGE_URL)
@@ -50,8 +51,10 @@ def create_app(config_name):
     return app
 
 
-app = create_app("development")
+with open('config.json') as f:
+    json_info = json.load(f)
 
+app = create_app(json_info["environment"])
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")

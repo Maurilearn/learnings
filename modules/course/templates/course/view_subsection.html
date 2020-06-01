@@ -32,32 +32,94 @@
   href="{{url_for('course.subsection_add_text', subsection_id=subsection.id)}}">
   <i class="fa fa-pen-alt"></i> Add text</a> 
 <a class="btn btn-info" 
-  href="">
-  <i class="fa fa-file"></i> Add file</a>
+  href="{{url_for('course.resource_add_video', subsection_id=subsection.id)}}">
+  <i class="fa fa-file"></i> Add video</a>
 <a class="btn btn-info"
   href="{{url_for('course.subsection_add_homework', subsection_id=subsection.id)}}">
   <i class="fa fa-plus"></i> Add Homework</a>
-{%endif%}
 
 <br><br>
+Markdown reminder:
+
+{%set instructions = '''# big text
+## smaller text
+### smaller text
+
+_italic_ **bold** [google.com](https://www.google.com)
+
+- abc
+- def
+- ghi
+
+```python
+print(1)
+```
+
+```html
+<b></b>
+```
+
+```
+some text
+```
+
+'''%}
+
+<div>
+  <div class="row">
+    <div class="col">
+      {{instructions.replace('\n', '<br>') | safe}}
+    </div>
+    <div class="col">
+      {{ render_md(instructions) | safe }}
+    </div>
+  </div>
+</div>
+{%endif%}
+
+<br>
 
 {%for resource in subsection.resources%}
       
     {%if current_user.id == subsection.section.course.teacher_id or current_user.role == 'admin'%}
     <a
-      class="badge badge-info" 
-      href="">
-      edit
-    </a> 
-    <a
       class="badge badge-danger" 
-      href="{{url_for('course.resource_delete', resource_id=resource.id)}}">
+      href="{{url_for('course.resource_delete', resource_id=resource.id)}}"
+      onClick="return confirm('Are you sure you wish to delete?');">
       delete
     </a>
     {%endif%}
     <br>
-    {%if resource.type == 'text'%}
-        {{ render_md(resource.text) | safe }}
+    {%if current_user.id == subsection.section.course.teacher_id or current_user.role == 'admin'%}
+      {%if resource.type == 'text'%}
+          <form 
+            action="{{url_for('course.resource_text_edit_check', resource_id=resource.id)}}"
+            method='POST'>
+            <textarea 
+            style="margin:5px" 
+            name="text_value" 
+            class="form-control" 
+            rows="10" 
+            cols="20">{{resource.text}}</textarea>
+
+            <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+            <button class="btn btn-info">save</button>
+          </form>
+          <br>
+
+      {%elif resource.type == 'video'%}
+         
+         <a href="{{url_for('cdn.resource_video', resource_id=resource.id)}}">{{resource.filename}}</a>
+         <br>
+         <video controls width="400" height="300" muted>
+          <source src="{{url_for('cdn.resource_video', resource_id=resource.id)}}" type="video/mp4">
+          <source src="video-tag-sample.webm" type="video/webm">
+          <source src="video-tag-demo.ogg" type="video/ogg">
+          Video tag is not supported in this browser.
+        </video>
+      {%endif%}
+    {%else%}
+      {{ render_md(resource.text) | safe }}
     {%endif%}
 {%endfor%}
 

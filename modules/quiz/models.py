@@ -8,8 +8,9 @@ class Quiz(db.Model):
     question = db.Column(db.String(100))
     section_id = db.Column(db.Integer, db.ForeignKey('sections.id'),
         nullable=False)
+    # https://stackoverflow.com/questions/60805/getting-random-row-through-sqlalchemy
     answers = db.relationship('Answer', backref='quiz', lazy=True,
-        cascade="all, delete, delete-orphan")
+        cascade="all, delete, delete-orphan", order_by='func.random()')
 
     def insert(self):
         db.session.add(self)

@@ -10,8 +10,11 @@
 
 {% block content %}
 {%include 'course/partials/nav.html'%}
-
-<p><a href="{{url_for('course.view', course_id=section.course_id)}}">back</a></p>
+<br>
+<p><a 
+	class="btn btn-info" 
+	href="{{url_for('course.view', course_id=section.course_id)}}">back</a></p>
+	<br>
 <h3>Section {{section.name}}</h3>
 
 <form action="{{url_for('course.add_subsection_check', section_id=section.id)}}" method="POST">

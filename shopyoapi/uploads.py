@@ -8,16 +8,16 @@ from modules.auth.models import User
 # from modules.settings.models import Settings
 
 
-def add_admin(name, email, password, role):
+def add_admin(name, email, password):
     with app.app_context():
         admin = User(
             name=name,
             email=email,
-            role=role
+            role='admin'
         )
         admin.set_hash(password)
         admin.insert()
-        print('[x] added admin:', name, email, password, role)
+        print('[x] added admin:', name, email, password)
 '''
 def add_setting(name, value):
     with app.app_context():

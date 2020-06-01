@@ -23,7 +23,8 @@
         <tr>
             <th>Name</th>
             <th>Author</th>
-            <th></th>
+            <th>Action</th>
+            <th>Status</th>
         </tr>
     </thead>
     <tbody>
@@ -39,7 +40,14 @@
             <a class="btn btn-danger" href="{{url_for('course.delete_check', course_id=course.id)}}"
                 onClick="return confirm('Are you sure you wish to delete?');">
                 <i class="fa fa-trash"></i>
-            </a> 
+            </a>
+        </td>
+        <td>
+            {%if course.submitted%}
+                <i style="color:green" title="submitted" class="fa fa-check"></i> Submitted 
+            {%else%}
+                <i style="color:red" title="not submitted"  class="fa fa-hourglass-half"></i> Not submitted 
+            {%endif%}
         </td>
     </tr>
 {%endfor%}

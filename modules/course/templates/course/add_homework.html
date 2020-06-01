@@ -10,7 +10,9 @@
 
 {% block content %}
 {%include 'course/partials/nav.html'%}
-
+<a class="btn btn-info" href="{{url_for('course.view_subsection', subsection_id=subsection.id)}}">back</a>
+<br>
+<br>
 <form action="{{url_for('course.subsection_add_homework_check', subsection_id=subsection.id)}}" method="POST" enctype="multipart/form-data">
 
 <div class="form-field">

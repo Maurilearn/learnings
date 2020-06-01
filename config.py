@@ -1,14 +1,31 @@
+import os
+import json
+
+with open('config.json') as f:
+    json_info = json.load(f)
+
 class Config:
     """Parent configuration class."""
+    APP_NAME = 'Amilearn'
 
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = "sqlite:///test.db"
+    # "mysql://username:password@localhost/db_name"
+    # pip install pymysqldb
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://{username}:{password}@{name}/{db_name}".format(
+            username=json_info['connect']['username'],
+            password=os.environ['AMILEARN_MYSQL_PASS'],
+            name=json_info['connect']['name'],
+            db_name=json_info['connect']['db_name']
+        )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "qow32ijjdkc756osk5dmck"  # Need a generator
     HOMEPAGE_URL = "/course"
     LOGIN_VIEW = "auth.login"
     LOGIN_MESSAGE = "Please login for access"
 
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024 # 16MB
+
+    UPLOAD_VIDEO_FOLDER = 'static/uploads/video' 
     UPLOADED_PHOTOS_DEST = 'static/img' 
     UPLOADED_PHOTOS_ALLOW = ('png', 'jpg', 'jpeg')
     UPLOADED_DOCS_DEST = 'static/uploads/docs' 
@@ -19,7 +36,7 @@ class Config:
     SMTP_HOST = ''
     SMTP_PORT = 458
     SMTP_MAIN_MAIL = ''
-    SMTP_PASS = ''
+    SMTP_PASS = os.environ['AMILEARN_MAIL_PASS']
 
 
 class DevelopmentConfig(Config):
@@ -33,7 +50,7 @@ class DevelopmentConfig(Config):
     SMTP_HOST = 'smtp.gmail.com'
     SMTP_PORT = 587
     SMTP_MAIN_MAIL = 'arj.message@gmail.com'
-    SMTP_PASS = 'berry654321'
+    SMTP_PASS = os.environ['AMILEARN_MAIL_PASS']
 
 
 class TestingConfig(Config):

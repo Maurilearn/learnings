@@ -111,10 +111,8 @@ some text
          
          <a href="{{url_for('cdn.resource_video', resource_id=resource.id)}}">{{resource.filename}}</a>
          <br>
-         <video controls width="400" height="300" muted>
-          <source src="{{url_for('cdn.resource_video', resource_id=resource.id)}}" type="video/mp4">
-          <source src="video-tag-sample.webm" type="video/webm">
-          <source src="video-tag-demo.ogg" type="video/ogg">
+         <video controls width="400" height="300">
+          <source src="{{url_for('cdn.resource_video', resource_id=resource.id)}}">
           Video tag is not supported in this browser.
         </video>
       {%endif%}

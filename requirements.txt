@@ -5,3 +5,4 @@ flask_upload
 pymysql
 faker
 flask_script
+flask_login

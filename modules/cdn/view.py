@@ -81,6 +81,8 @@ def homework_evaluated(evaluation_id):
 def resource_video(resource_id):
     resource = Resource.query.get(resource_id)
     return send_from_directory('static/uploads/video',
-                        as_attachment=True)
+                        resource.filename)
     # as_attachment=True
+
+
 

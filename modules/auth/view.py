@@ -10,11 +10,13 @@ from flask import flash
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
+from flask_login import current_user
 
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
 from shopyoapi.enhance import base_context
 
+from userapi.html import notify_warning
 
 auth_blueprint = Blueprint(
     "auth",
@@ -50,7 +52,7 @@ def check_login ():
             ).first()
 
             if user is None or not user.check_hash(form.password.data):
-                flash("please check your user id and password")
+                flash(notify_warning("please check your user id and password"))
                 return redirect(url_for("auth.login"))
             login_user(user)
             if user.role == 'admin':
@@ -82,3 +84,11 @@ def login_required(role="ANY"):
         return decorated_view
     return wrapper
 '''
+
+@auth_blueprint.route("/password/change", methods=['GET', 'POST'])
+@login_required
+def change_pass():
+    if request.method == 'POST':
+        current_user.set_hash(request.form['password'])
+        current_user.update()
+        return redirect(url_for('profile.index', user_id=current_user.id))

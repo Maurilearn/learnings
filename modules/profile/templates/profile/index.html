@@ -15,9 +15,11 @@
 
 <div class="container">
     <div class="row">
+        {%if current_user.role != 'admin'%}
         <div class="col">
             <canvas id="pie-chart" width="100" height="100"></canvas>
         </div>
+        {%endif%}
         <div class="col">
             <table class="table">
                 <tbody>
@@ -29,6 +31,7 @@
                         <td><i class="fa fa-envelope"></i></td>
                         <td>{{user.email}}</td>
                     </tr>
+                    {%if current_user.role != 'admin'%}
                     <tr>
                         <td><i class="fa fa-coffee"></i></td>
                         <td style="font-style: capitalize;">{{user.role}}</td>
@@ -41,12 +44,32 @@
                         <td><i class="fa fa-certificate"></i></td>
                         <td style="font-style: capitalize;">{{num_completed}}</td>
                     </tr>
+                    {%endif%}
+                    <tr>
+                        <td>
+
+                        </td>
+                        <td>
+                            <form
+                                action="{{url_for('auth.change_pass')}}"
+                                method='POST'
+                            >
+                            change password
+                            <input class="form-control" type="password"
+                                name="password">
+                            <br>
+                            <input class="btn btn-info" type="submit" name="" value="save">
+                            <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                            </form>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
+{%if current_user.role != 'admin'%}
 <script type="text/javascript">
 
 new Chart(document.getElementById("pie-chart"), {
@@ -70,4 +93,5 @@ new Chart(document.getElementById("pie-chart"), {
 $('#pie-chart').css("width", "500");
 $('#pie-chart').css("height", "500");
 </script>
+{%endif%}
 {% endblock %}

@@ -11,11 +11,11 @@
 {%set active_page = 'manage'%}
 {%include 'course/partials/nav.html'%}
 <br>
-<a class="btn btn-info" href="{{url_for('course.add')}}">Add Course</a>
 
-{%if current_user.role == 'admin'%}
-<a class="btn btn-info" href="{{url_for('course.add')}}">Add For Others</a>
+{%if current_user.role == 'teacher'%}
+<a class="btn btn-info" href="{{url_for('course.add')}}">Add Course</a>
 {%endif%}
+
 <br>
 <h1>Courses</h1>
 <table class="table">
@@ -23,7 +23,9 @@
         <tr>
             <th>Name</th>
             <th>Author</th>
+            {%if current_user.role == 'teacher'%}
             <th>Action</th>
+            {%endif%}
             <th>Status</th>
         </tr>
     </thead>
@@ -33,6 +35,7 @@
     <tr>
         <td>{{course.name}}</td>
         <td>{{teacher.name}}</td>
+        {%if current_user.role == 'teacher'%}
         <td>
             <a class="btn btn-info" href="{{url_for('course.view', course_id=course.id)}}">
                 <i class="fa fa-book"></i>
@@ -42,6 +45,7 @@
                 <i class="fa fa-trash"></i>
             </a>
         </td>
+        {%endif%}
         <td>
             {%if course.submitted%}
                 <i style="color:green" title="submitted" class="fa fa-check"></i> Submitted 

@@ -10,6 +10,8 @@ git clone https://github.com/Abdur-rahmaanJ/learnings.git
 
 for push `git push origin master` as only one branch
 
+for update `git pull origin master`
+
 # install packages
 
 try on the commandline
@@ -39,44 +41,70 @@ name: AMILEARN_MYSQL_PASS
 value: value for mysql password
 ```
 
-In config.json replace with correct values for mysql connection:
+# Creating database
 
-```
-"connect": {
-      "username":"root",
-      "name":"localhost",
-      "db_name":"amilearn"
-    }
+```sql
+CREATE DATABASE maurilearn;
 ```
 
-# admin pass
+on the mysql console
 
-default admin
+# Configure connection
 
-change before initialising
+In config.py under `class DevelopmentConfig(Config)` set the username, server_name and db name
+
 ```
-"admin": {
+SQLALCHEMY_DATABASE_URI = "mysql+pymysql://{username}:{password}@{server_name}/{db_name}".format(
+            username='root',
+            password=check_environ('AMILEARN_MYSQL_PASS'),
+            server_name='localhost',
+            db_name='maurilearn'
+        )
+```
+
+# Default password and environment
+
+In config.json configure as appropriate, leave development as such
+
+You can add more admins
+
+```
+{
+    "environment": "development",
+    "admins": [
+      {
       "email": "arj.python@gmail.com",
       "password": "pass",
       "name": "Abdur-Rahmaan Janhangeer"
-    },
+      },
+      {
+      "email": "jdoe@gmail.com",
+      "password": "pass",
+      "name": "John Doe"
+      }
+    ]
+}
 ```
 
-# initialise
+# Initialise 
 
+run 
 
 ```
 python manage.py initialise
 ```
 
-Add random students and teachers
+to add random students and teachers:
+
 ```
 python manage.py populate
 ```
 
-# Run server
+to run server
 
 ```
 python manage.py rundebug
 ```
 
+by default it runs on port 5000 with url `http://127.0.0.1` and
+can be accessed via `http://127.0.0.1:5000`

@@ -5,11 +5,14 @@ import subprocess
 import json
 import importlib
 
+from shopyoapi.init import db
 from shopyoapi.utils import trycopytree
 from shopyoapi.utils import trycopy
 from shopyoapi.utils import trymkdir
 from shopyoapi.utils import trymkfile
 from shopyoapi.uploads import add_admin
+
+
 #from shopyoapi.uploads import add_setting
 
 
@@ -46,19 +49,66 @@ def clean():
         print("__pycache__ successfully deleted")
     else:
         print("__pycache__ doesn't exist")
+
+    while 1:
+        answer = input(
+            'Still want to continue? This will re-initialise your whole app\n'
+            'y/n ?\n'
+            '> ')
+        answer = answer.casefold().strip()
+        if answer in ['y', 'n']:
+            if answer == 'n':
+                print('Setup abortion confirmed, exiting ...')
+                sys.exit()
+            elif answer == 'y':
+                break
+        else:
+            print('Could not understand answer. Exiting ...')
+            sys.exit()
+
     if os.path.exists("migrations"):
         shutil.rmtree("migrations")
-        print("migrations successfully deleted")
+        print("[x] migrations folder successfully deleted")
     else:
-        print("migrations folder doesn't exist")
+        print("[ ] migrations folder doesn't exist")
 
+    from app import app
+    with app.test_request_context():
+        db.drop_all()
+        db.engine.execute('DROP TABLE IF EXISTS alembic_version;')
+        print("[x] all tables dropped")
+    
+'''
+    
+    while 1:
+        answer = input(
+            'Still want to continue? This will re-initialise your whole app\n'
+            'y/n ?\n'
+            '> ')
+        answer = answer.casefold().strip()
+        if answer in ['y', 'n']:
+            if answer == 'n':
+                print('Setup abortion confirmed, exiting ...')
+                sys.exit()
+            elif answer == 'y':
+                break
+        else:
+            print('Could not understand answer. Exiting ...')
+            sys.exit()
+            '''
 
 def initialise():
-
+    print('initialising ...')
+    print(
+        'Warning!\n'
+        'Make sure your database exists. The code will only create '
+        'tables for you'
+        )
+    print("Creating Tables")
+    print("#######################")
     with open("config.json", "r") as config:
         config = json.load(config)
-    print("Creating Db")
-    print("#######################")
+    
     subprocess.run(
         [sys.executable, "manage.py", "db", "init"], stdout=subprocess.PIPE
     )
@@ -73,24 +123,13 @@ def initialise():
 
     print("Initialising User")
     print("#######################")
-    add_admin(
-        config["admin"]["name"],
-        config["admin"]["email"],
-        config["admin"]["password"]
-    )
-    add_admin(
-        'John Doe',
-        'jdoe@gmail.com',
-        'pass',
-        'admin'
-    )
+    for admin_config in config['admins']:
+        add_admin(
+            admin_config["name"],
+            admin_config["email"],
+            admin_config["password"]
+        )
 
-    '''
-    print("Initialising Settings")
-    print("#######################")
-    for name, value in config["settings"].items():
-        add_setting(name, value)
-    '''
     print("Done!")
 
 def create_module(modulename):

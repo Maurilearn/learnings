@@ -1,18 +1,15 @@
 {
     "environment": "development",
-    "admin": {
+    "admins": [
+      {
       "email": "arj.python@gmail.com",
       "password": "pass",
       "name": "Abdur-Rahmaan Janhangeer"
-    },
-    "settings": {
-      "APP_NAME": "Demo",
-      "SECTION_NAME": "Manufacturer",
-      "SECTION_ITEMS": "Products"
-    },
-    "connect": {
-      "username":"root",
-      "name":"localhost",
-      "db_name":"amilearn"
-    }
+      },
+      {
+      "email": "jdoe@gmail.com",
+      "password": "pass",
+      "name": "John Doe"
+      }
+    ]
 }

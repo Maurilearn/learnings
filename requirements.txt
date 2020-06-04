@@ -1,8 +1,12 @@
 reportlab
 flask_sqlalchemy
 flask_migrate
-flask_upload
+flask_uploads
 pymysql
 faker
 flask_script
 flask_login
+markdown
+werkzeug==0.16.1
+flask_wtf
+email_validator

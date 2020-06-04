@@ -7,8 +7,12 @@ from modules.course.models import Resource
 
 from flask import Blueprint
 from flask import send_from_directory
+from flask import current_app
+from flask import flash
+
 from flask_login import login_required
 from flask_login import current_user
+from userapi.html import notify_info
 
 
 cdn_blueprint = Blueprint(
@@ -34,8 +38,14 @@ def certificate(course_id):
         (Certificate.course_id == course_id)
         ).first() # course completed
     if certif:
-        return send_from_directory('static/certificates',
+        # '''
+        return send_from_directory(current_app.config['UPLOAD_CERTIFICATES_FOLDER'],
                            certif.filename)
+        # '''
+        '''
+        return '{}<br>{}'.format(current_app.config['UPLOAD_CERTIFICATES_FOLDER'],
+            certif.filename)
+            '''
     else:
         return "You can't view this certificate"
 
@@ -44,8 +54,9 @@ def certificate(course_id):
 @login_required
 def homework(hwork_id):
     hwork = Homework.query.get(hwork_id)
-    return send_from_directory('static/uploads/docs',
-                           hwork.filename)
+    return send_from_directory(current_app.config['UPLOADED_DOCS_DEST'],
+                           hwork.filename, 
+                           as_attachment=True)
 
 @cdn_blueprint.route('/homework/submitted/<submission_id>', methods=["GET", "POST"])
 @login_required
@@ -56,8 +67,9 @@ def homework_submitted(submission_id):
         current_user.role == 'admin' or
         current_user.id == teacher_id
         ):
-        return send_from_directory('static/uploads/homework_submits',
-                           submission.filename)
+        return send_from_directory(current_app.config['UPLOADED_HOMEWORKSUBMITS_DEST'],
+                           submission.filename, 
+                           as_attachment=True)
     else:
         return 'No permission to view file'
 
@@ -70,8 +82,9 @@ def homework_evaluated(evaluation_id):
         current_user.role == 'admin' or
         current_user.id == teacher_id
         ):
-        return send_from_directory('static/uploads/homework_submits',
-                           evaluation.filename)
+        return send_from_directory(current_app.config['UPLOADED_HOMEWORKSUBMITS_DEST'],
+                           evaluation.filename, 
+                           as_attachment=True)
     else:
         return 'No permission to view file'
 
@@ -80,8 +93,9 @@ def homework_evaluated(evaluation_id):
 @login_required
 def resource_video(resource_id):
     resource = Resource.query.get(resource_id)
-    return send_from_directory('static/uploads/video',
-                        resource.filename)
+    return send_from_directory(current_app.config['UPLOAD_VIDEO_FOLDER'],
+                        resource.filename, 
+                           as_attachment=True)
     # as_attachment=True
 
 

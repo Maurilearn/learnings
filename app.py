@@ -5,7 +5,7 @@ from flask import Flask, redirect, send_from_directory
 import json
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
-from shopyoapi.init import ma
+#from shopyoapi.init import ma
 
 from shopyoapi.init import photos
 from shopyoapi.init import docs
@@ -16,13 +16,15 @@ from flask_wtf.csrf import CSRFProtect
 from modules.auth.models import User
 from flask_uploads import UploadSet, configure_uploads, IMAGES
 
+base_path = os.path.dirname(os.path.abspath(__file__))
+
 def create_app(config_name):
     app = Flask(__name__)
     configuration = app_config[config_name]
     app.config.from_object(configuration)
 
     db.init_app(app)
-    ma.init_app(app)
+    #ma.init_app(app)
     csrf = CSRFProtect(app)
     
     configure_uploads(app, photos)
@@ -37,7 +39,7 @@ def create_app(config_name):
     def load_user(id):
         return User.query.get(id)
 
-    for module in os.listdir("modules"):
+    for module in os.listdir(os.path.join(base_path, "modules")):
         if module.startswith("__"):
             continue
         mod = importlib.import_module("modules.{}.view".format(module))
@@ -51,7 +53,7 @@ def create_app(config_name):
     return app
 
 
-with open('config.json') as f:
+with open(os.path.join(base_path, 'config.json')) as f:
     json_info = json.load(f)
 
 app = create_app(json_info["environment"])

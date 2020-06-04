@@ -119,13 +119,6 @@
     <div class="">
       <h4>About</h4>
       Elearning Platform
-      <h4>Instructors</h4>
-      {%for teacher in User.query.filter(
-                (User.role == 'teacher') 
-                ).all()%}
-
-        {{teacher.email}}<br>
-      {%endfor%}
     </div>
     <div class="">
       <!--
@@ -136,7 +129,7 @@
     </div>
   </div>
   <div class="row app-copyright">
-    maurilearn (<span id="year"></span>)
+    {{APP_NAME}} (<span id="year"></span>)
   </div>
 
 </footer>

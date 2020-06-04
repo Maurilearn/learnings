@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(128))
     name = db.Column(db.String(120))
     role = db.Column(db.String(120))
+    pass_changed = db.Column(db.Boolean, default=False)
 
     courses = db.relationship("Course",
         secondary=course_subs, 

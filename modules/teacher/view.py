@@ -9,10 +9,12 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import flash
+from flask import current_app
 
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
+from flask_login import current_user
 
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
@@ -30,6 +32,12 @@ teacher_blueprint = Blueprint(
     template_folder="templates",
 )
 
+@teacher_blueprint.after_request
+def teacher_after_request(response):
+    if current_user.check_hash(current_app.config['DEFAULT_PASS_ALL']):
+        flash(notify_info('Change default password please to get access!'))
+        return redirect(url_for('profile.index', user_id=current_user.id))
+    return response
 
 @teacher_blueprint.route("/")
 @roles_required(['admin'])

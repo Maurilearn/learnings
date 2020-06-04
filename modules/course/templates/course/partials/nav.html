@@ -37,16 +37,17 @@
            href="{{url_for('course.view_homework_submissions')}}">Evaluate Homeworks</a>
         </li>
       
-      <li class="nav-item {{ 'app-active' if active_page == 'available_courses' else '' }}">
-        <a class="nav-link"
-           href="{{url_for('course.list')}}">Available Courses</a>
-      </li>
-      <li class="nav-item {{ 'app-active' if active_page == 'my_courses' else '' }}">
-        <a class="nav-link"
-           href="{{url_for('course.mycourses')}}">My Courses</a>
-      </li>
 
-
+      {%endif%}
+      {%if current_user.role != 'admin'%}
+        <li class="nav-item {{ 'app-active' if active_page == 'available_courses' else '' }}">
+          <a class="nav-link"
+             href="{{url_for('course.list')}}">Available Courses</a>
+        </li>
+        <li class="nav-item {{ 'app-active' if active_page == 'my_courses' else '' }}">
+          <a class="nav-link"
+             href="{{url_for('course.mycourses')}}">My Courses</a>
+        </li>
       {%endif%}
       <li class="nav-item {{ 'app-active' if active_page == 'profile' else '' }}">
         <a class="nav-link"

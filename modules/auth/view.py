@@ -90,5 +90,6 @@ def login_required(role="ANY"):
 def change_pass():
     if request.method == 'POST':
         current_user.set_hash(request.form['password'])
+        current_user.pass_changed = True
         current_user.update()
         return redirect(url_for('profile.index', user_id=current_user.id))

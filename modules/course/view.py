@@ -1,5 +1,6 @@
 import datetime
 import os
+import json
 
 from modules.auth.models import User
 from modules.auth.access import roles_required
@@ -57,8 +58,6 @@ from userapi.email import send_mail
 
 from werkzeug import secure_filename
 from reportlab.pdfgen import canvas
-import random
-from sqlalchemy import func
 
 course_blueprint = Blueprint(
     "course",
@@ -67,6 +66,12 @@ course_blueprint = Blueprint(
     template_folder="templates",
 )
 
+@course_blueprint.after_request
+def course_after_request(response):
+    if current_user.check_hash(current_app.config['DEFAULT_PASS_ALL']):
+        flash(notify_info('Change default password please to get access!'))
+        return redirect(url_for('profile.index', user_id=current_user.id))
+    return response
 
 @course_blueprint.route("/")
 @roles_required(['admin', 'teacher'])
@@ -247,8 +252,6 @@ def add_section(course_id):
     # context['form'] = AddSectionForm()
     return render_template('course/add_section.html', **context)
 
-def json_safe(s):
-    return s.replace('"', '\\"').replace('\n', '\\n')
 @course_blueprint.route("/<course_id>/add/section/check", methods=['GET', 'POST'])
 @roles_required(['admin', 'teacher'])
 @login_required
@@ -258,11 +261,11 @@ def add_section_check(course_id):
         section_name = data['section_name']
         section = Section(name=section_name)
         for quiz in data['quizes']:
-            question = json_safe(data['quizes'][quiz]['question'])
+            question = json.dumps(data['quizes'][quiz]['question'])
             current_quiz = Quiz(question=question)
             answers = data['quizes'][quiz]['answers']
             for answer in answers:
-                ans = json_safe(answer['string'])
+                ans = json.dumps(answer['string'])
                 current_quiz.answers.append(
                     Answer(string=ans, correct=answer['correct']))
             section.quizzes.append(current_quiz)
@@ -283,12 +286,12 @@ def edit_quiz_check(section_id):
             section.quizzes[:] = []
             for quiz in data['quizes']:
                 question = data['quizes'][quiz]['question']
-                question = json_safe(question)
+                question = json.dumps(question)
                 current_quiz = Quiz(question=question)
                 answers = data['quizes'][quiz]['answers']
                 for answer in answers:
                     ans = answer['string']
-                    ans = json_safe(ans)
+                    ans = json.dumps(ans)
                     current_quiz.answers.append(
                         Answer(string=ans, correct=answer['correct']))
                 section.quizzes.append(current_quiz)
@@ -396,6 +399,7 @@ def view_subsection(subsection_id):
         (HomeworkEvaluation.course_taker_id == current_user.id) &
         (HomeworkEvaluation.subsection_id == subsection_id)
         ).all()
+
     return render_template('course/view_subsection.html', **context)
 
 
@@ -537,7 +541,6 @@ def take_quiz(section_id):
     section = Section.query.get(section_id)
     course_id = section.course.id
     context['section'] = section
-    context['func'] = func
     # https://stackoverflow.com/questions/60805/getting-random-row-through-sqlalchemy
     return render_template('course/take_quiz.html', **context)
 
@@ -714,11 +717,16 @@ def approve_certif_req(certif_req_id):
     #flash(notify_info('{}'.format(os.getcwd())))
     
     try:
-        dirname = "static/certificates/"
+        dirname = current_app.config['UPLOAD_CERTIFICATES_FOLDER']
+        try:
+            os.mkdir(dirname)
+        except:
+            pass
         filename = "{}_{}.pdf".format(person_name, course_name)
-        fname = dirname+filename
-        with open(fname, 'w+') as f:
-            f.write('')
+        fname = os.path.join(dirname, filename)
+        # flash(notify_info(fname))
+        #with open(fname, 'w+') as f:
+        #    f.write('')
         c = canvas.Canvas(fname)
         c.setTitle("Certificate")
         init_y = 250

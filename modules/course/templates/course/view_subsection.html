@@ -92,6 +92,8 @@ some text
     <br>
     {%if current_user.id == subsection.section.course.teacher_id or current_user.role == 'admin'%}
       {%if resource.type == 'text'%}
+      <div class="row">
+        <div class="col">
           <form 
             action="{{url_for('course.resource_text_edit_check', resource_id=resource.id)}}"
             method='POST'>
@@ -105,6 +107,12 @@ some text
             <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
             <button class="btn btn-info">save</button>
           </form>
+        </div>
+        <div class="col">
+          {{ render_md(resource.text) | safe }}
+        </div>
+      </div>
+          
           <br>
 
       {%elif resource.type == 'video'%}

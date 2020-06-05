@@ -2,6 +2,7 @@ import importlib
 import os
 
 from flask import Flask, redirect, send_from_directory
+from flask import url_for
 import json
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
@@ -48,7 +49,7 @@ def create_app(config_name):
 
     @app.route("/")
     def index():
-        return redirect(configuration.HOMEPAGE_URL)
+        return redirect(url_for('auth.login'))
 
     return app
 

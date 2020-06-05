@@ -1,6 +1,7 @@
 import os
 import json
 import sys
+from flask import url_for
 
 from userapi.html import notify_warning
 
@@ -28,7 +29,7 @@ class Config:
     SQLALCHEMY_DATABASE_URI = '' # we override it below
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = "qow32ijjdkc756osk5dmck"  # Need a generator
-    HOMEPAGE_URL = "/course"
+
     LOGIN_VIEW = "auth.login"
     LOGIN_MESSAGE = notify_warning("Please login for access")
 

@@ -1,1 +1,7 @@
 - use celery to send mail
+
+- [x] prevent same email when creating user
+- [x] remove field password
+- [x] check first error
+- 2 accounts for 2 schools (now 1)
+- check for submit course on profile page

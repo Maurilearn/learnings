@@ -50,7 +50,7 @@ def index():
     form = AddStudentForm()
     context['form'] = form
     
-    context['MESSAGES'] = [request.args.get('message', default='a')]
+    # context['MESSAGES'] = [request.args.get('message', default='a')]
     return render_template('student/index.html', **context)
 
 @student_blueprint.route("/add/check", methods=['GET', 'POST'])
@@ -62,13 +62,20 @@ def add_check():
         form = AddStudentForm()
         # if form.validate_on_submit():
         if not form.validate_on_submit():
-            return render_template(url_for('course.index'))
+            return redirect(url_for('student.index'))
+
+        user = User.query.filter(
+            User.email == form.email.data
+        ).first()
+        if user:
+            flash(notify_danger('Mail already exists!'))
+            return redirect(url_for('student.index'))
         student = User(
                 name=form.name.data,
                 email=form.email.data,
                 role='student'
             )
-        student.set_hash(form.password.data)
+        student.set_hash(current_app.config['DEFAULT_PASS_ALL'])
         student.insert()
         flash(notify_success('Added {}!'.format(form.email.data)))
         return redirect(url_for('student.index'))
@@ -94,7 +101,7 @@ def edit(student_id):
 @login_required
 def delete(student_id):
     student = User.query.get(student_id)
-    name = student.name
+    email= student.email
     student.delete()
-    flash(notify_danger('deleted {}!'.format(name)))
+    flash(notify_danger('deleted user {}!'.format(email)))
     return redirect(url_for('student.index'))

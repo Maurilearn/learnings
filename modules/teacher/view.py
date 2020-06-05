@@ -23,7 +23,7 @@ from shopyoapi.enhance import base_context
 from userapi.html import notify_success
 from userapi.html import notify_danger
 from userapi.html import notify_info
-
+from userapi.html import notify_warning
 
 teacher_blueprint = Blueprint(
     "teacher",
@@ -60,16 +60,24 @@ def add_check():
         form = AddTeacherForm()
         # if form.validate_on_submit():
         if not form.validate_on_submit():
+            flash(notify_warning('Form not valid!'))
             return render_template(url_for('course.index'))
+        user = User.query.filter(
+            User.email == form.email.data
+        ).first()
+        if user:
+            flash(notify_danger('Mail already exists!'))
+            return redirect(url_for('teacher.index'))
         teacher = User(
                 name=form.name.data,
                 email=form.email.data,
                 role='teacher'
             )
-        teacher.set_hash(form.password.data)
+        teacher.set_hash(current_app.config['DEFAULT_PASS_ALL'])
         teacher.insert()
         flash(notify_success('Added {}!'.format(teacher.name)))
         return redirect(url_for('teacher.index'))
+
 
 
 @teacher_blueprint.route("/edit/<teacher_id>", methods=['GET', 'POST'])

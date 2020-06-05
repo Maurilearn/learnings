@@ -26,13 +26,6 @@ class AddStudentForm(FlaskForm):
             'autocomplete':'off',
             }
         )
-    password = PasswordField('Password', [
-        DataRequired()],
-        render_kw={
-            'class':'form-control',
-            'autocomplete':'off',
-            }
-        )
     submit = SubmitField('Submit',
         render_kw={
             'class':'btn btn-info',

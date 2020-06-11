@@ -130,4 +130,4 @@ dmypy.json
 
 migrations/
 config.py
-
+config.json

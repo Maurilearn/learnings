@@ -11,7 +11,7 @@ with open(os.path.join(base_path, 'config.json')) as f:
     json_info = json.load(f)
 
 def check_environ(env_var_name):
-    if os.environ[env_var_name]:
+    if env_var_name in os.environ:
         return os.environ[env_var_name]
     else:
         print('[DANGER] Environment variable not found:', env_var_name)

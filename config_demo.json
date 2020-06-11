@@ -1,0 +1,15 @@
+{
+    "environment": "",
+    "admins": [
+      {
+      "email": "arj.python@gmail.com",
+      "password": "pass",
+      "name": "Abdur-Rahmaan Janhangeer"
+      },
+      {
+      "email": "jdoe@gmail.com",
+      "password": "pass",
+      "name": "John Doe"
+      }
+    ]
+}

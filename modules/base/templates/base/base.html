@@ -48,13 +48,15 @@
             color: inherit;
           }
           .app-footer{
-            width: 100% !important;
+
             color: white !important;
-            padding: 50px !important;
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            padding: 10px; color: white!important;
+            width: 100%;
           }
-          .app-footer .row div{
-            margin: 10px !important;
-          }
+
           .app-copyright{
             font-size: 10px;
           }
@@ -72,6 +74,12 @@
           }
           .app-active .dropdown-menu a {
             color: black !important;
+          }
+          .footer-dummy{
+            height: 100px !important;
+          }
+          body{
+            overflow-x: hidden !important;
           }
     </style>
     {% block pagehead %}{% endblock %}
@@ -111,27 +119,13 @@
 
 </div>
 
-<br>
-
-<footer class="app-footer page-footer bg-dark container" style="">
-  <br>
-  <div class="row">
-    <div class="">
-      <h4>About</h4>
-      Elearning Platform
-    </div>
-    <div class="">
-      <!--
-      <i class="fa fa-map-marker-alt"></i> Location <br>
-      <i class="fa fa-mobile-alt"></i> +230 11 11 11 11 <br>
-      <i class="fa fa-envelope"></i> contact@somemail.com
-    -->
-    </div>
-  </div>
-  <div class="row app-copyright">
-    {{APP_NAME}} (<span id="year"></span>)
-  </div>
-
+<div class="footer-dummy">
+  
+</div>
+<footer class="app-footer page-footer bg-dark" style="">
+  <div class="" style="">
+    {{APP_NAME}}-<span id="year"></span><br>
+    MauriLearn is a web-based Learning Management System for Mauritius.
 </footer>
 
 <script type="text/javascript">

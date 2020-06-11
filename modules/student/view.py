@@ -39,17 +39,22 @@ def student_after_request(response):
         return redirect(url_for('profile.index', user_id=current_user.id))
     return response
 
-@student_blueprint.route("/")
+@student_blueprint.route("/", methods=['GET'], defaults={"page": 1})
+@student_blueprint.route('/<int:page>', methods=['GET'])
 @roles_required(['admin'])
 @login_required
-def index():
+def index(page):
+    page = page
+    per_page = 5
     context = base_context()
-    context['students'] = User.query.filter(
+    student_query = User.query.filter(
         (User.role == 'student')
-    ).all()
+    )
+    context['students'] = student_query.paginate(page, per_page, error_out=False)
     form = AddStudentForm()
     context['form'] = form
-    
+    context['number_records'] = len(student_query.all())
+    context['per_page'] = per_page
     # context['MESSAGES'] = [request.args.get('message', default='a')]
     return render_template('student/index.html', **context)
 

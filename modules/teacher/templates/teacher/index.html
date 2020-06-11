@@ -13,7 +13,34 @@
 <br>
 <div class="row">
     <div class="col-sm-9">
-      <table class="table ">
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+      {% if teachers.has_prev %}
+        <li class="page-item"> <a class="page-link" href="{{ url_for('teacher.index', page=teachers.prev_num) }}">Previous</a></li>
+      {% else %}
+        <li class="page-item"><a class="page-link btn disabled" href="#">Previous</a></li>
+      {% endif %}
+
+      <li class="page-item"><a class="page-link" href="{{ url_for('teacher.index', page=0) }}">1</a></li>
+
+      
+      <li class="page-item"><a class="page-link" href="#">..</a></li>
+
+      {% if (number_records//per_page)+1 != 0%}
+      <li class="page-item"><a class="page-link" href="{{ url_for('teacher.index', page=(number_records//per_page)+1) }}">{{(number_records//per_page)+1}}</a></li>
+      {%endif%}
+
+      {% if teachers.has_next %}
+        <li class="page-item"> <a class="page-link" href="{{ url_for('teacher.index', page=teachers.next_num) }}">Next</a></li>
+      {% else %}
+        <li class="page-item"><a class="page-link btn disabled" href="#">Next</a></li>
+      {% endif %}
+  </ul>
+</nav>
+
+      <div style="overflow-x: scroll;">
+        <table class="table " style="width: 1000px">
           <thead>
             <tr>
               <th scope="col">Name</th>
@@ -24,25 +51,27 @@
             </tr>
           </thead>
           <tbody>
-            {%for teacher in teachers%}
+            {%for teacher in teachers.items%}
             <tr>
               <form action="{{url_for('teacher.edit', teacher_id=teacher.id)}}" method="POST">
-                <td><input name="teacher_name"
+                <td><input style="" name="teacher_name"
                       class="form-control" value="{{teacher.name}}"></td>
-                <td><input name="teacher_email"
+                <td><input style="" name="teacher_email"
                       class="form-control" value="{{teacher.email}}"></td>
-                <td><input name="teacher_password" 
+                <td><input style="" name="teacher_password" 
                       class="form-control" value=""></td>
-                <td><input class="btn btn-info" type="submit" value="save"></td>
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <td><input style="" class="btn btn-info" type="submit" value="save"></td>
+                    <input style="" type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               </form>
-              <td><a 
+              <td><a style="" 
                     class="btn btn-danger" 
                     href="{{url_for('teacher.delete', teacher_id=teacher.id)}}">delete</a></td>
             </tr>
             {%endfor%}
           </tbody>
       </table>
+      </div>
+      
     </div><!--col sm 9 -->
     <div class="col-sm-3">
         <div class="card">
@@ -59,6 +88,7 @@
                   </div>
                   {{ form.name }}
               </div>
+              </div>
 
               <div class="form-field">
               {{ form.email.label }} <br>
@@ -68,6 +98,7 @@
                   </div>
                   {{ form.email }}
               </div>
+              </div>
 
               {{ form.submit }}
               {{ form.csrf_token }}
@@ -76,6 +107,5 @@
           </div>
         </div>
     </div><!--col sm 3-->
-</div>
 </div>
 {% endblock %}

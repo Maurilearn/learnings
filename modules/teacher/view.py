@@ -39,14 +39,22 @@ def teacher_after_request(response):
         return redirect(url_for('profile.index', user_id=current_user.id))
     return response
 
-@teacher_blueprint.route("/")
+@teacher_blueprint.route("/", methods=['GET'], defaults={"page": 1})
+@teacher_blueprint.route('/<int:page>', methods=['GET'])
 @roles_required(['admin'])
 @login_required
-def index():
+def index(page):
     context = base_context()
-    context['teachers'] = User.query.filter(
+    page = page
+    per_page = 5
+    context = base_context()
+    teacher_query = User.query.filter(
         (User.role == 'teacher')
-    ).all()
+    )
+    context['teachers'] = teacher_query.paginate(page, per_page, error_out=False)
+
+    context['number_records'] = len(teacher_query.all())
+    context['per_page'] = per_page
     form = AddTeacherForm()
     context['form'] = form
     return render_template('teacher/index.html', **context)

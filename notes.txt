@@ -5,3 +5,23 @@
 - [x] check first error
 - 2 accounts for 2 schools (now 1)
 - check for submit course on profile page
+
+
+much work done for creation on
+course creation itself
+
+#  Maths
+[ + ]
+	# Chapter1 [add MCQ] [Add Note] [Add Video] [Add HWork]
+	# Chapter2
+	# Chapter3
+
+submit chapters individually
+
+[x] special page for change pass first time
+
+beautify certificate
+
+customise school info
+
+add grade

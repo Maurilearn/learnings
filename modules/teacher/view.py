@@ -36,7 +36,7 @@ teacher_blueprint = Blueprint(
 def teacher_after_request(response):
     if current_user.check_hash(current_app.config['DEFAULT_PASS_ALL']):
         flash(notify_info('Change default password please to get access!'))
-        return redirect(url_for('profile.index', user_id=current_user.id))
+        return redirect(url_for('auth.change_pass', user_id=current_user.id))
     return response
 
 @teacher_blueprint.route("/", methods=['GET'], defaults={"page": 1})

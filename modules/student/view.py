@@ -36,14 +36,28 @@ student_blueprint = Blueprint(
 def student_after_request(response):
     if current_user.check_hash(current_app.config['DEFAULT_PASS_ALL']):
         flash(notify_info('Change default password please to get access!'))
-        return redirect(url_for('profile.index', user_id=current_user.id))
+        return redirect(url_for('auth.change_pass', user_id=current_user.id))
     return response
 
-@student_blueprint.route("/", methods=['GET'], defaults={"page": 1})
-@student_blueprint.route('/<int:page>', methods=['GET'])
+
+@student_blueprint.route('/', methods=['GET'])
 @roles_required(['admin'])
 @login_required
-def index(page):
+def index():
+    pass
+
+@student_blueprint.route('/add/grade/check', methods=['GET', 'POST'])
+@roles_required(['admin'])
+@login_required
+def add_grade_check():
+    pass
+
+
+@student_blueprint.route("/list/grade/<grade_id>/", methods=['GET'], defaults={"page": 1})
+@student_blueprint.route('/list/grade/<grade_id>/<int:page>', methods=['GET'])
+@roles_required(['admin'])
+@login_required
+def list_students(grade_id, page):
     page = page
     per_page = 5
     context = base_context()

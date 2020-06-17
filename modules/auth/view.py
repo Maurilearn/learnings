@@ -84,10 +84,14 @@ def login_required(role="ANY"):
         return decorated_view
     return wrapper
 '''
-
 @auth_blueprint.route("/password/change", methods=['GET', 'POST'])
 @login_required
 def change_pass():
+    return render_template('auth/pass_change.html')
+
+@auth_blueprint.route("/password/change/check", methods=['GET', 'POST'])
+@login_required
+def change_pass_check():
     if request.method == 'POST':
         current_user.set_hash(request.form['password'])
         current_user.pass_changed = True

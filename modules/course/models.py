@@ -1,6 +1,26 @@
 from shopyoapi.init import db
 from datetime import datetime
 
+class Grade(db.Model):
+    __tablename__ = 'grades'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    courses = db.relationship('Course', backref='grade', lazy=True,
+        cascade="all, delete, delete-orphan")
+    students = db.relationship('User', backref='grade', lazy=True,
+        cascade="all, delete, delete-orphan")
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 
 class Course(db.Model):
     __tablename__ = 'courses'
@@ -10,8 +30,8 @@ class Course(db.Model):
     submitted = db.Column(db.Boolean, default=False)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'),
         nullable=False)
-    sections = db.relationship('Section', backref='course', lazy=True,
-        cascade="all, delete, delete-orphan")
+    grade_id = db.Column(db.Integer, db.ForeignKey('grades.id'),
+        nullable=False)
 
     def insert(self):
         db.session.add(self)

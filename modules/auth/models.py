@@ -26,6 +26,8 @@ class User(UserMixin, db.Model):
     quiz_histories = db.relationship('QuizHistory', backref='person', lazy=True,
         cascade="all, delete, delete-orphan")
 
+    grade_id = db.Column(db.Integer, db.ForeignKey('grades.id'))
+
     def set_hash(self, password):
         self.password = generate_password_hash(password, method="sha256")
 

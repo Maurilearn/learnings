@@ -1,0 +1,120 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%set active_page = 'manage'%}
+{%include 'course/partials/nav.html'%}
+{%for message in messages%}
+        {{message}}
+{%endfor%}
+<br>
+<div class="row">
+    <div class="col-sm-9">
+
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination">
+      {% if students.has_prev %}
+        <li class="page-item"> <a class="page-link" href="{{ url_for('student.index', page=students.prev_num) }}">Previous</a></li>
+      {% else %}
+        <li class="page-item"><a class="page-link btn disabled" href="#">Previous</a></li>
+      {% endif %}
+
+      <li class="page-item"><a class="page-link" href="{{ url_for('student.index', page=0) }}">1</a></li>
+
+      
+      <li class="page-item"><a class="page-link" href="#">..</a></li>
+
+      {% if (number_records//per_page)+1 != 0%}
+      <li class="page-item"><a class="page-link" href="{{ url_for('student.index', page=(number_records//per_page)+1) }}">{{(number_records//per_page)+1}}</a></li>
+      {%endif%}
+
+      {% if students.has_next %}
+        <li class="page-item"> <a class="page-link" href="{{ url_for('student.index', page=students.next_num) }}">Next</a></li>
+      {% else %}
+        <li class="page-item"><a class="page-link btn disabled" href="#">Next</a></li>
+      {% endif %}
+  </ul>
+</nav>
+
+<div style="overflow-x: scroll;">
+<table class="table " style="width: 1000px">
+    <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Pass</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {%for student in students.items%}
+        <tr>
+          <form action="{{url_for('student.edit', student_id=student.id, grade_id=grade.id)}}" method="POST">
+            <td><input name="student_name"
+                  class="form-control" value="{{student.name}}"></td>
+            <td><input name="student_email"
+                  class="form-control" value="{{student.email}}"></td>
+            <td><input name="student_password" 
+                  class="form-control" value=""></td>
+            <td><input class="btn btn-info" type="submit" value="save"></td>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          </form>
+          <td><a 
+                class="btn btn-danger" 
+                href="{{url_for('student.delete', student_id=student.id)}}">delete</a></td>
+        </tr>
+        {%endfor%}
+      </tbody>
+</table>
+
+
+
+</div>
+    </div>
+    <div class="col-sm-3">
+        <div class="card">
+          <div class="card-header">
+            Add Student
+          </div>
+          <div class="card-body">
+
+<form action="{{url_for('student.add_check', grade_id=grade.id)}}" method="POST">
+
+<div class="form-field">
+{{ form.name.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-info"></i></span>
+    </div>
+    {{ form.name }}
+</div>
+</div>
+
+<div class="form-field">
+{{ form.email.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+    </div>
+    {{ form.email }}
+</div>
+</div>
+
+{{ form.submit }}
+{{ form.csrf_token }}
+</form>
+
+          </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -10,6 +10,22 @@ from wtforms.validators import Length
 from wtforms.validators import Email
 from wtforms.ext.sqlalchemy.fields import QuerySelectField
 
+
+class AddGradeForm(FlaskForm):
+    name = StringField('Name', [
+        DataRequired()],
+        render_kw={
+            'class':'form-control',
+            'autocomplete':'off'
+            }
+        )
+    submit = SubmitField('Submit',
+        render_kw={
+            'class':'btn btn-info',
+            'value':'Submit'
+            }
+        )
+
 class AddStudentForm(FlaskForm):
     name = StringField('Name', [
         DataRequired()],

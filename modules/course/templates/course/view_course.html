@@ -72,7 +72,7 @@
 {%include 'course/partials/nav.html'%}
 <br>
 
-
+<a href="{{url_for('course.index')}}" class="btn btn-info"><i class="fa fa-long-arrow-alt-left"></i> back</a>
 
 {%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
 
@@ -97,9 +97,12 @@
 </div>
 </form>
 
+Course for: <b>{{course.grade}}</b><br>
 Submitted courses can be accessed by users. 
 To be eligible to submit the course should have
-at least one section with at least one chapter
+at least one section with at least one chapter<br>
+
+
 <br>
 <div>
 <a 

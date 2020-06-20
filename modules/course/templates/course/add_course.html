@@ -27,6 +27,17 @@
     </div>
     {{ form.name }}
 </div>
+</div>
+
+<div class="form-field">
+{{ form.grade.label }} <br>
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <span class="input-group-text"><i class="fa fa-book"></i></span>
+    </div>
+    {{ form.grade }}
+</div>
+</div>
 
 {{ form.submit }}
 {{ form.csrf_token }}

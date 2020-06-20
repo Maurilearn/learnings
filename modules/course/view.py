@@ -109,6 +109,7 @@ def add_check():
             name=form.name.data,
             teacher_id=current_user.id
             )
+        course.grade_id = form.grade.data.id
         course.insert()
     return redirect(url_for('course.add'))
 

@@ -1,0 +1,21 @@
+Flask is known and used for it's simplicity and straightforwardness. It's simple to get started with and you implement what you want while managing the complexity you need. However at some point you need to have a structural pattern that allows your code to be organised while keeping regular errors like the circular import in check. A nice pattern that is currently used and recommended is the Factory pattern which among others play well with testing. This talk is about what you can do to take your Flask app, big and small to new heights, i.e. how you can improve your app beyond using the App Factory pattern. One core point is about implementing the modular pattern and how it provides a better development and maintenance experience. It discusses the various flavors that you can twerk it to customize your experience even more. We also go over how the talk solves some common concerns about using Flask as well as some caveats found.
+
+With such a pattern, the talk go even further to explore what possibilities the pattern offers that would not have been possible with a traditional approach. It describes the automation spree that waterfalls as a result like the auto-creation of modules, the implementation of plugins and how you can stop worrying about routine development steps. It also discusses how the pattern can be used as the basis and the focal point of a true Flask revolution. About how extensions can also be product-oriented instead of just giving technical abilities. It finishes on the aspect on how this can help beginners lay their hands on extensive Flask apps and how such an approach might help knit together the Flask community and encourage Flask contributions. Such a move results in the strengthening of the Flask ecosystem and benefits the casual coder as well as companies.
+
+Requirements
+This talk assumes that in relation to Flask:
+
+you built several apps
+you used an ORM at the very least, here we'll be using SQLalchemy
+you used migrations
+you used the Application Factory pattern
+you used Flask-wtf
+It would be also nice if you used other web frameworks as well as REST extentions. The point about requirements is making sure you used Flask to a certain degree and are in a position to gauge the talk's worth, enjoy it and assess how much of the talk can benefit you.
+
+Roadmap
+Brief of the Application Factory and Configuration Management
+Points that make web development a delight
+Introduction to the modular pattern
+Customising the pattern
+Pattern remarks
+- Even more possibilities out of the box

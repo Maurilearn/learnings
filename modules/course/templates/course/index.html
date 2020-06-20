@@ -13,11 +13,12 @@
 <br>
 
 {%if current_user.role == 'teacher'%}
-<a class="btn btn-info" href="{{url_for('course.add')}}">Add Course</a>
+<a class="btn btn-info" href="{{url_for('lightcourse.add')}}"><i class="fa fa-plus"></i> Add Light Course</a>
+<a class="btn btn-info" href="{{url_for('course.add')}}"><i class="fa fa-plus"></i> Add Full Course</a>
 {%endif%}
 
 <br>
-<h1>Courses</h1>
+<h1>Full Courses</h1>
 <div style="overflow-x: scroll;">
 
 <table class="table" style="width: 1000px;">

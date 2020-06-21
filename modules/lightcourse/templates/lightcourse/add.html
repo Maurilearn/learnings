@@ -26,7 +26,7 @@
     <div class="input-group-prepend">
         <span class="input-group-text"><i class="fa fa-book"></i></span>
     </div>
-    <input autocomplete="off" class="form-control" id="chapter_name" name="chapter_name" required type="text" value="">
+    <input autocomplete="off" class="form-control" id="course_name" name="chapter_name" required type="text" value="">
 </div>
 </div>
 
@@ -115,8 +115,8 @@ Grade <br>
         ></textarea>
         <div id="chapter_render_1"></div>
         <script type="text/javascript">
-            jQuery('#chapter_1_text').on('input', function() {
-                document.getElementById('chapter_1_render').innerHTML=marked($('#chapter_1_text').val());
+            jQuery('#chapter_text_1').on('input', function() {
+                document.getElementById('chapter_render_1').innerHTML=marked($('#chapter_text_1').val());
             });
         </script>
     </div>
@@ -252,9 +252,9 @@ $( document ).ready(function() {
         }
         return true;
     }
-    function not_chapter_name_empty(){
-        if ($('#chapter_name').val().trim() === ''){
-            alert('chapter name cannot be empty');
+    function not_course_name_empty(){
+        if ($('#course_name').val().trim() === ''){
+            alert('course name cannot be empty');
             return false;
         }
         return true;
@@ -370,16 +370,16 @@ $( document ).ready(function() {
     });
     $("#submit").click(function(){
         update_completed();
-        
         if(
             not_quiz_empty() & 
-            not_chapter_name_empty() & 
+            not_course_name_empty() & 
             get_num_empty_quiz() <= 1 &
             not_chapter_content_empty()){
             // alert('ready to submit');
-            json_submit['chapter_name'] = $("#chapter_name").val().trim();
+            json_submit['course_name'] = $("#course_name").val().trim();
             json_submit['grade_id'] = $('#chapter_grade').children("option:selected").prop('value');
             c_count = 1;
+            json_submit['chapters'] = [];
             $('[id^="chapter_row_"]').each(function() {
                 json_submit['chapters'].push({
                     "name":$('#chapter_name_'+c_count.toString()).val(),
@@ -387,15 +387,17 @@ $( document ).ready(function() {
                     });
                 c_count += 1;
             });
+
             if(json_submit['quizes'][(num_quiz).toString()]['answers'].length === 0){
                 update_json();
                 update_completed();
             }
+            print(json_submit);
             
-            /*$.ajax({
+            $.ajax({
 
                 type: "POST",
-                url: "/to-be-filled",
+                url: "{{url_for('lightcourse.add_check')}}",
                 // The key needs to match your method's input parameter (case-sensitive).
                 data: JSON.stringify(json_submit),
                 contentType: "application/json; charset=utf-8",
@@ -413,7 +415,7 @@ $( document ).ready(function() {
                         xhr.setRequestHeader("X-CSRFToken", "{{csrf_token()}}")
                     }
                 }
-            });*/
+            });
         }else{
             alert('cannot submit');
         }
@@ -445,14 +447,14 @@ $( document ).ready(function() {
         row = `
         <div id="chapter_row_${chapNum}">
             ${chapNum}. <input class="form-control" id='chapter_name_${chapNum}' type="text"><br>
-            <textarea class="form-control" rows="10" id="chapter_${chapNum}_text"></textarea>
-            <div id="chapter_${chapNum}_render"></div>
+            <textarea class="form-control" rows="10" id="chapter_text_${chapNum}"></textarea>
+            <div id="chapter_render_${chapNum}"></div>
         
         </div>`;
 
         $('#chapters').append(row);
         $('#chapters-counter-display').html(chapNum);
-        $(document).on('input', '#chapter_'+chapNum+'_text',function(){
+        $(document).on('input', '#chapter_text_'+chapNum,function(){
             document.getElementById('chapter_render_'+chapNum).innerHTML = marked(
                 $('#chapter_text_'+chapNum).val());
         })

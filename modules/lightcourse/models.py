@@ -1,6 +1,48 @@
 from shopyoapi.init import db
 from datetime import datetime
 
+class LightQuiz(db.Model):
+    __tablename__ = 'light_quizes'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    question = db.Column(db.String(100))
+    course_id = db.Column(db.Integer, db.ForeignKey('light_courses.id'),
+        nullable=False)
+    # https://stackoverflow.com/questions/60805/getting-random-row-through-sqlalchemy
+    answers = db.relationship('LightAnswer', backref='quiz', lazy=True,
+        cascade="all, delete, delete-orphan", order_by='func.random()')
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+class LightAnswer(db.Model):
+    __tablename__ = 'light_answers'
+    id = db.Column(db.Integer, primary_key=True)
+    string = db.Column(db.String(100))
+    correct = db.Column(db.Boolean)
+    quizz_id = db.Column(db.Integer, db.ForeignKey('light_quizes.id'),
+        nullable=False)
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
 class LightCourse(db.Model):
     __tablename__ = 'light_courses'
     id = db.Column(db.Integer, primary_key=True)
@@ -12,6 +54,8 @@ class LightCourse(db.Model):
     grade_id = db.Column(db.Integer, db.ForeignKey('grades.id'),
         nullable=False)
     chapters = db.relationship('LightChapter', backref='course', lazy=True,
+        cascade="all, delete, delete-orphan")
+    quizzes = db.relationship('LightQuiz', backref='course', lazy=True,
         cascade="all, delete, delete-orphan")
 
     def insert(self):

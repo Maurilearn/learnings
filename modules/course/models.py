@@ -7,6 +7,8 @@ class Grade(db.Model):
     name = db.Column(db.String(100))
     courses = db.relationship('Course', backref='grade', lazy=True,
         cascade="all, delete, delete-orphan")
+    light_courses = db.relationship('LightCourse', backref='grade', lazy=True,
+        cascade="all, delete, delete-orphan")
     students = db.relationship('User', backref='grade', lazy=True,
         cascade="all, delete, delete-orphan")
 

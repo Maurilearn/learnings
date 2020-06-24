@@ -1,7 +1,11 @@
 import json
+import os
+
+from werkzeug import secure_filename
 
 from modules.auth.access import roles_required
 
+from modules.auth.models import User
 from modules.course.models import Grade
 from .models import LightAnswer
 from .models import LightQuiz
@@ -18,12 +22,10 @@ from flask import flash
 from flask import jsonify
 from flask import current_app
 
-
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
 from flask_login import current_user
-
 
 from userapi.renders import render_md
 from userapi.html import notify_danger
@@ -33,11 +35,16 @@ from userapi.html import notify_warning
 from userapi.forms import flash_errors
 from userapi.email import send_mail
 
-
 from shopyoapi.enhance import base_context
-
+from shopyoapi.init import alldocs
+from shopyoapi.init import docs
+from shopyoapi.init import photos
+from shopyoapi.init import homeworksubmits
 
 from .forms import AddLightCourseForm
+from .forms import AddLightChapterForm
+from .forms import AddTextForm
+from .forms import AddDocsForm
 
 lightcourse_blueprint = Blueprint(
     "lightcourse",
@@ -96,22 +103,164 @@ def add_check():
         flash(notify_success('course added!'))
         return jsonify({"submission": "ok"})
 
+@lightcourse_blueprint.route("/<course_id>/view", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def view(course_id):
+    context = base_context()
+    course = LightCourse.query.get(course_id)
+    form = AddLightChapterForm()
+    context['course'] = course
+    context['form'] = form
+    context['User'] = User
+
+    return render_template('lightcourse/view.html', **context)
 
 
-        '''
-        section_name = data['section_name']
-        section = Section(name=section_name)
-        for quiz in data['quizes']:
-            question = json.dumps(data['quizes'][quiz]['question'])
-            current_quiz = Quiz(question=question)
-            answers = data['quizes'][quiz]['answers']
-            for answer in answers:
-                ans = json.dumps(answer['string'])
-                current_quiz.answers.append(
-                    Answer(string=ans, correct=answer['correct']))
-            section.quizzes.append(current_quiz)
-        course = Course.query.get(course_id)
-        course.sections.append(section)
-        course.update()
-        return jsonify({"submission": "ok"})
-        '''
+@lightcourse_blueprint.route("/<course_id>/add/chapter", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def add_chapter_check(course_id):
+    form = AddLightChapterForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            course = LightCourse.query.get(course_id)
+            course.chapters.append(LightChapter(name=form.name.data))
+            course.update()
+        else:
+            flash_errors(form)
+
+    return redirect(url_for('lightcourse.view', course_id=course_id))
+
+
+@lightcourse_blueprint.route("/view/chapter/<chapter_id>", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def view_chapter(chapter_id):
+    context = base_context()
+    chapter = LightChapter.query.get(chapter_id)
+    context['chapter'] = chapter
+    context['render_md'] = render_md
+    context['add_text_form'] = AddTextForm()
+    context['add_docs_form'] = AddDocsForm()
+    return render_template('lightcourse/view_chapter.html', **context)
+
+
+@lightcourse_blueprint.route("/resource/<resource_id>/text/edit/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def resource_text_edit_check(resource_id):
+    if request.method == 'POST':
+        resource = LightResource.query.get(resource_id)
+        chapter_id = resource.chapter.id
+        resource.text = request.form['text_value']
+        resource.update()
+        return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
+
+@lightcourse_blueprint.route("/chapter/<chapter_id>/add/text/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def chapter_add_text_check(chapter_id):
+    if request.method == 'POST':
+        form = AddTextForm()
+        chapter = LightChapter.query.get(chapter_id)
+        chapter.resources.append(LightResource(text=form.text.data))
+        chapter.update()
+        return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
+
+@lightcourse_blueprint.route("/resource/<resource_id>/delete", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def resource_delete(resource_id):
+    resource = LightResource.query.get(resource_id)
+    chapter_id = resource.chapter.id
+    resource.delete()
+    return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
+
+
+def video_allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'mp4', 'avi'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@lightcourse_blueprint.route("/chapter/<chapter_id>/add/video/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def resource_add_video_check(chapter_id):
+    if request.method == 'POST':
+        chapter = LightChapter.query.get(chapter_id)
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash(notify_warning('Video file empty!'))
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash(notify_warning('No selected file'))
+            return redirect(request.url)
+        if file and video_allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            resource = LightResource(type='video', filename=filename)
+            chapter.resources.append(resource)
+            chapter.update()
+            file.save(os.path.join(current_app.config['UPLOAD_VIDEO_FOLDER'], filename))
+            return redirect(url_for('lightcourse.view_chapter',
+                                        chapter_id=chapter_id))
+
+
+
+@lightcourse_blueprint.route("/chapter/<chapter_id>/add/docs/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def resource_add_alldocs_check(chapter_id):
+    form = AddDocsForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            filename = alldocs.save(request.files[form.file_input.data.name])
+            resource = LightResource(type='doc', filename=filename)
+            chapter = LightChapter.query.get(chapter_id)
+            chapter.resources.append(resource)
+            chapter.update()
+            flash(notify_success('Homework file uploaded'))
+        else:
+            flash_errors(form)
+    return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
+
+
+
+@lightcourse_blueprint.route("/chapter/<chapter_id>/add/photos/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def resource_add_photos_check(chapter_id):
+    form = AddPhotosForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            filename = photos.save(request.files[form.file_input.data.name])
+            resource = LightResource(type='photo', filename=filename)
+            chapter = LightChapter.query.get(chapter_id)
+            chapter.resources.append(resource)
+            chapter.update()
+            flash(notify_success('Homework file uploaded'))
+        else:
+            flash_errors(form)
+    return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
+
+
+@lightcourse_blueprint.route("/chapter/<chapter_id>/add/homework/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def resource_add_homework_check(chapter_id):
+    form = AddHomeworkForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            filename = docs.save(request.files[form.file_input.data.name])
+            resource = LightResource(type='photo', filename=filename)
+            chapter = LightChapter.query.get(chapter_id)
+            chapter.resources.append(resource)
+            chapter.update()
+            flash(notify_success('Homework file uploaded'))
+        else:
+            flash_errors(form)
+    return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))

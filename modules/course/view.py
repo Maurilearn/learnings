@@ -4,6 +4,7 @@ import json
 
 from modules.auth.models import User
 from modules.auth.access import roles_required
+from modules.lightcourse.models import LightCourse
 
 from .models import Course
 from .models import Section
@@ -86,7 +87,14 @@ def index():
         courses = Course.query.filter(
             (Course.teacher_id==current_user.id)
             ).all()
+    if current_user.role == 'admin':
+        light_courses = LightCourse.query.all()
+    else:
+        light_courses = LightCourse.query.filter(
+            (LightCourse.teacher_id == current_user.id)
+            ).all()
     context['courses'] = courses
+    context['light_courses'] = light_courses
     return render_template('course/index.html', **context)
 
 @course_blueprint.route("/add")

@@ -11,6 +11,7 @@ from shopyoapi.init import login_manager
 from shopyoapi.init import photos
 from shopyoapi.init import docs
 from shopyoapi.init import homeworksubmits
+from shopyoapi.init import alldocs
 
 from config import app_config
 from flask_wtf.csrf import CSRFProtect
@@ -31,6 +32,7 @@ def create_app(config_name):
     configure_uploads(app, photos)
     configure_uploads(app, docs)
     configure_uploads(app, homeworksubmits)
+    configure_uploads(app, alldocs)
 
     login_manager.init_app(app)
     login_manager.login_view = configuration.LOGIN_VIEW

@@ -5,6 +5,8 @@ from modules.course.models import HomeworkEvaluation
 from modules.course.models import SubSection
 from modules.course.models import Resource
 
+from modules.lightcourse.models import LightResource
+
 from flask import Blueprint
 from flask import send_from_directory
 from flask import current_app
@@ -99,4 +101,10 @@ def resource_video(resource_id):
     # as_attachment=True
 
 
-
+@cdn_blueprint.route('/lightcourse/resource/video/<resource_id>', methods=["GET", "POST"])
+@login_required
+def light_resource_video(resource_id):
+    resource = LightResource.query.get(resource_id)
+    return send_from_directory(current_app.config['UPLOAD_VIDEO_FOLDER'],
+                        resource.filename, 
+                           as_attachment=True)

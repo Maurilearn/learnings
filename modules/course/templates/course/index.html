@@ -18,7 +18,7 @@
 {%endif%}
 
 <br>
-<h1>Full Courses</h1>
+<h2>Full Courses</h2>
 <div style="overflow-x: scroll;">
 
 <table class="table" style="width: 1000px;">
@@ -47,6 +47,51 @@
                 onClick="return confirm('Are you sure you wish to delete?');">
                 <i class="fa fa-trash"></i>
             </a>
+        </td>
+        {%endif%}
+        <td>
+            {%if course.submitted%}
+                <i style="color:green" title="submitted" class="fa fa-check"></i> Submitted 
+            {%else%}
+                <i style="color:red" title="not submitted"  class="fa fa-hourglass-half"></i> Not submitted 
+            {%endif%}
+        </td>
+    </tr>
+{%endfor%}
+    </tbody>
+</table>
+</div>
+<br>
+<h2>Light Courses</h2>
+<div style="overflow-x: scroll;">
+<table class="table" style="width: 1000px;">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Author</th>
+            {%if current_user.role == 'teacher'%}
+            <th>Action</th>
+            {%endif%}
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+{% for course in light_courses %}
+    {%set teacher = User.query.get(course.teacher_id)%}
+    <tr>
+        <td>{{course.name}}</td>
+        <td>{{teacher.name}}</td>
+        {%if current_user.role == 'teacher'%}
+        <td>
+            
+            <a class="btn btn-info" href="{{url_for('lightcourse.view', course_id=course.id)}}">
+                <i class="fa fa-book"></i>
+            </a> 
+            <!--
+            <a class="btn btn-danger" href="{{url_for('course.delete_check', course_id=course.id)}}"
+                onClick="return confirm('Are you sure you wish to delete?');">
+                <i class="fa fa-trash"></i>
+            </a>-->
         </td>
         {%endif%}
         <td>

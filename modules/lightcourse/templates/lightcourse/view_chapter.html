@@ -1,0 +1,179 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+<link rel="stylesheet"
+  href="/static/highlightjs/styles/atelier-forest-light.css">
+<style type="text/css">
+    body{
+        overflow-x: hidden;
+    }
+</style>
+{% endblock %}
+
+
+
+{% block content %}
+{%set active_page = 'manage'%}
+{%include 'course/partials/nav.html'%}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<br>
+<a href="{{url_for('lightcourse.view', course_id=chapter.course.id)}}" class="btn btn-info"><i class="fa fa-long-arrow-alt-left"></i> back</a>
+<br><br>
+
+{%if current_user.id == chapter.course.teacher_id%}
+    <div class="card">
+        <div class="card-header">
+            Upload Resource
+        </div>
+        <div class="card-body" style="overflow-x: scroll">
+            <div style="width: 1000px;">
+                <form
+                    class="" 
+                    method=post enctype=multipart/form-data
+                    action="{{url_for('lightcourse.resource_add_video_check', chapter_id=chapter.id)}}">
+
+                      <div class="input-group mb-3">
+                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">Video</span>
+                        </div>
+                        <input type="file" class="form-control" name=file>
+                        <div class="input-group-append">
+                          <input class="btn btn-info form-control" type=submit value=Upload >
+                        </div>
+                      </div>
+                    </form>
+                    <form
+                    class="" 
+                    method="POST" enctype="multipart/form-data"
+                    action="{{url_for('lightcourse.resource_add_alldocs_check', chapter_id=chapter.id)}}">
+
+                      <div class="input-group mb-3">
+                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">{{add_docs_form.file_input.label}}</span>
+                        </div>
+                        {{add_docs_form.file_input}}
+                        <div class="input-group-append">
+                          <input class="btn btn-info form-control" type=submit value=Upload >
+                        </div>
+                      </div>
+                    </form>
+
+                    <form
+                    class="" 
+                    method=post enctype=multipart/form-data
+                    action="">
+
+                      <div class="input-group mb-3">
+                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">Homework</span>
+                        </div>
+                        <input type="file" class="form-control" name=file>
+                        <div class="input-group-append">
+                          <input class="btn btn-info form-control" type=submit value=Upload >
+                        </div>
+                      </div>
+                    </form>
+
+                    <form
+                    class="" 
+                    method=post enctype=multipart/form-data
+                    action="">
+
+                      <div class="input-group mb-3">
+                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">Image</span>
+                        </div>
+                        <input type="file" class="form-control" name=file>
+                        <div class="input-group-append">
+                          <input class="btn btn-info form-control" type=submit value=Upload >
+                        </div>
+                      </div>
+                    </form>
+
+                    <form 
+                        action="{{url_for('lightcourse.chapter_add_text_check', chapter_id=chapter.id)}}"
+                        method="POST">
+                        {{add_text_form.text}}
+                        <div id="add_text_render" class="col">
+                            
+                        </div>
+                        <script type="text/javascript">
+                            jQuery('#add_text_text').on('input', function() {
+                                document.getElementById('add_text_render').innerHTML=marked($('#add_text_text').val());
+                            });
+                        </script>
+                        <br>
+                        {{add_text_form.csrf_token}}
+                        <button type="submit" class="btn btn-info">Add text</button>
+                    </form>
+            </div>
+        </div>
+    </div>
+<br>
+{%endif%}
+
+
+{%for resource in chapter.resources%}
+    {%if current_user.id == chapter.course.teacher_id%}
+        {%if resource.type == 'text'%}
+        <div style="overflow-x: scroll;">
+            <div class="row" style="width: 900px;">
+                <div class="col">
+                    <a href="{{url_for('lightcourse.resource_delete', resource_id=resource.id)}}" class="badge badge-danger">delete</a>
+                  <form 
+                    action="{{url_for('lightcourse.resource_text_edit_check', resource_id=resource.id)}}"
+                    method='POST'>
+                    <textarea 
+                    id="text_{{loop.index}}"
+                    style="margin:5px" 
+                    name="text_value" 
+                    class="form-control" 
+                    rows="10" 
+                    cols="20">{{resource.text}}</textarea>
+
+                    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                    <button class="btn btn-info">save</button>
+                  </form>
+                </div>
+                <div class="col" id="render_{{loop.index}}">
+                  {{ render_md(resource.text) | safe }}
+                </div>
+              </div>
+              <script type="text/javascript">
+                jQuery('#text_1').on('input', function() {
+                    document.getElementById('render_1').innerHTML=marked($('#text_1').val());
+                });
+              </script>
+        </div>
+        {%elif resource.type == 'video'%}
+            <a href="{{url_for('lightcourse.resource_delete', resource_id=resource.id)}}" class="badge badge-danger">delete</a><br>
+            <video width="320" height="240" controls>
+              <source src="{{url_for('cdn.light_resource_video', resource_id=resource.id)}}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+        {%endif%}
+    {%else%}
+        {%if resource.type == 'text'%}
+            <div>
+                {{ render_md(resource.text) | safe }}
+            </div>
+        {%elif resource.type == 'video'%}
+            <video width="320" height="240" controls>
+              <source src="{{url_for('cdn.light_resource_video', resource_id=resource.id)}}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+        {%endif%}
+        
+    {%endif%}
+{%endfor%}
+
+
+<script src="/static/highlightjs/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+{% endblock %}

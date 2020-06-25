@@ -14,9 +14,8 @@ from flask_wtf.file import FileAllowed
 from flask_wtf.file import FileRequired
 
 from shopyoapi.init import docs
-from shopyoapi.init import docs
-from shopyoapi.init import docs
-from shopyoapi.init import docs
+from shopyoapi.init import alldocs
+from shopyoapi.init import photos
 
 def grade_query():
     from modules.course.models import Grade
@@ -81,8 +80,8 @@ class AddTextForm(FlaskForm):
 
 class AddDocsForm(FlaskForm):
     file_input = FileField('Document', validators=[
-        FileAllowed(docs, "Doc must be in ('.rtf', '.odf', '.ods', '.gnumeric', '.abw', '.doc', "
-        "'.docx', '.xls', '.xlsx', '.ppt')"),
+        FileAllowed(alldocs, "Doc must be in ('.rtf', '.odf', '.ods', '.gnumeric', '.abw', '.doc', "
+        "'.docx', '.xls', '.xlsx', '.ppt', '.pdf')"),
         FileRequired('Doc file was empty!')
         ],
         render_kw={
@@ -105,7 +104,7 @@ class AddPhotosForm(FlaskForm):
 
 class AddHomeworkForm(FlaskForm):
     file_input = FileField('Homework', validators=[
-        FileAllowed(homeworksubmits, 'Homework must be in pdf odt or docx'),
+        FileAllowed(docs, 'Homework must be in pdf odt or docx'),
         FileRequired('Homework was empty!')
         ],
         render_kw={

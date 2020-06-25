@@ -131,3 +131,4 @@ dmypy.json
 migrations/
 config.py
 config.json
+static/uploads/

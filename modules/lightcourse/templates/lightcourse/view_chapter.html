@@ -65,14 +65,14 @@
                     <form
                     class="" 
                     method=post enctype=multipart/form-data
-                    action="">
+                    action="{{url_for('lightcourse.add_homework_check', chapter_id=chapter.id)}}">
 
                       <div class="input-group mb-3">
                         <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">Homework</span>
+                          <span class="input-group-text">{{add_homework_form.file_input.label}}</span>
                         </div>
-                        <input type="file" class="form-control" name=file>
+                        {{add_docs_form.file_input}}
                         <div class="input-group-append">
                           <input class="btn btn-info form-control" type=submit value=Upload >
                         </div>
@@ -82,14 +82,14 @@
                     <form
                     class="" 
                     method=post enctype=multipart/form-data
-                    action="">
+                    action="{{url_for('lightcourse.resource_add_photos_check', chapter_id=chapter.id)}}">
 
                       <div class="input-group mb-3">
                         <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                         <div class="input-group-prepend">
-                          <span class="input-group-text">Image</span>
+                          <span class="input-group-text">{{add_photos_form.file_input.label}}</span>
                         </div>
-                        <input type="file" class="form-control" name=file>
+                        {{add_photos_form.file_input}}
                         <div class="input-group-append">
                           <input class="btn btn-info form-control" type=submit value=Upload >
                         </div>
@@ -152,11 +152,22 @@
               </script>
         </div>
         {%elif resource.type == 'video'%}
+            <br>
             <a href="{{url_for('lightcourse.resource_delete', resource_id=resource.id)}}" class="badge badge-danger">delete</a><br>
             <video width="320" height="240" controls>
               <source src="{{url_for('cdn.light_resource_video', resource_id=resource.id)}}" type="video/mp4">
               Your browser does not support the video tag.
             </video>
+        {%elif resource.type == 'photo'%}
+            <br>
+            <a href="{{url_for('lightcourse.resource_delete', resource_id=resource.id)}}" class="badge badge-danger">delete</a><br>
+            <img src="{{url_for('cdn.light_resource_photo', resource_id=resource.id)}}">
+        {%elif resource.type == 'doc'%}
+            <br>
+            <a href="{{url_for('lightcourse.resource_delete', resource_id=resource.id)}}" class="badge badge-danger">delete</a><br>
+            <a 
+            class="btn btn-info" 
+            href="{{url_for('cdn.light_resource_doc', resource_id=resource.id)}}"><i class="fa fa-file-download"></i></a> {{resource.filename}}
         {%endif%}
     {%else%}
         {%if resource.type == 'text'%}
@@ -164,15 +175,60 @@
                 {{ render_md(resource.text) | safe }}
             </div>
         {%elif resource.type == 'video'%}
+            <br>
             <video width="320" height="240" controls>
               <source src="{{url_for('cdn.light_resource_video', resource_id=resource.id)}}" type="video/mp4">
               Your browser does not support the video tag.
             </video>
+        {%elif resource.type == 'photo'%}
+            <br>
+            <img src="{{url_for('cdn.light_resource_photo', resource_id=resource.id)}}">
+        {%elif resource.type == 'doc'%}
+            <br>
+            <a 
+            class="btn btn-info" 
+            href="{{url_for('cdn.light_resource_doc', resource_id=resource.id)}}"><i class="fa fa-file-download"></i></a> {{resource.filename}}
         {%endif%}
         
     {%endif%}
 {%endfor%}
 
+<h2>Homeworks</h2>
+
+
+{%for homework in chapter.homeworks%}
+    <p><a 
+    class="btn btn-info" 
+    href="{{url_for('cdn.light_homework', hwork_id=homework.id)}}"><i class="fa fa-file-download"></i></a> {{homework.filename}}</p>
+{%endfor%}
+
+<div class="card">
+    <div class="card-header">
+        Submit Homework
+    </div>
+    <div class="card-body">
+        
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        Homework Submitted
+    </div>
+    <div class="card-body">
+        
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="card-header">
+        Homework Evaluated
+    </div>
+    <div class="card-body">
+        
+    </div>
+</div>
 
 <script src="/static/highlightjs/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>

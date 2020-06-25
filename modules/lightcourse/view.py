@@ -12,6 +12,7 @@ from .models import LightQuiz
 from .models import LightCourse
 from .models import LightChapter
 from .models import LightResource
+from .models import LightHomework
 
 from flask import Blueprint
 from flask import url_for
@@ -45,6 +46,8 @@ from .forms import AddLightCourseForm
 from .forms import AddLightChapterForm
 from .forms import AddTextForm
 from .forms import AddDocsForm
+from .forms import AddHomeworkForm
+from .forms import AddPhotosForm
 
 lightcourse_blueprint = Blueprint(
     "lightcourse",
@@ -143,6 +146,8 @@ def view_chapter(chapter_id):
     context['render_md'] = render_md
     context['add_text_form'] = AddTextForm()
     context['add_docs_form'] = AddDocsForm()
+    context['add_photos_form'] = AddPhotosForm()
+    context['add_homework_form'] = AddHomeworkForm()
     return render_template('lightcourse/view_chapter.html', **context)
 
 
@@ -174,6 +179,12 @@ def chapter_add_text_check(chapter_id):
 def resource_delete(resource_id):
     resource = LightResource.query.get(resource_id)
     chapter_id = resource.chapter.id
+    if resource.type == 'doc':
+        os.remove(os.path.join(current_app.config['UPLOADED_ALLDOCS_DEST'], resource.filename))
+    elif resource.type == 'photo':
+        os.remove(os.path.join(current_app.config['UPLOADED_PHOTOS_DEST'], resource.filename))
+    elif resource.type == 'video':
+        os.remove(os.path.join(current_app.config['UPLOAD_VIDEO_FOLDER'], resource.filename))
     resource.delete()
     return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
 
@@ -189,6 +200,10 @@ def video_allowed_file(filename):
 @login_required
 def resource_add_video_check(chapter_id):
     if request.method == 'POST':
+        try:
+            os.mkdir(current_app.config['UPLOAD_VIDEO_FOLDER'])
+        except Exception as e:
+            pass
         chapter = LightChapter.query.get(chapter_id)
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -206,6 +221,7 @@ def resource_add_video_check(chapter_id):
             chapter.resources.append(resource)
             chapter.update()
             file.save(os.path.join(current_app.config['UPLOAD_VIDEO_FOLDER'], filename))
+            flash(notify_success('Video uploaded!'))
             return redirect(url_for('lightcourse.view_chapter',
                                         chapter_id=chapter_id))
 
@@ -223,7 +239,7 @@ def resource_add_alldocs_check(chapter_id):
             chapter = LightChapter.query.get(chapter_id)
             chapter.resources.append(resource)
             chapter.update()
-            flash(notify_success('Homework file uploaded'))
+            flash(notify_success('Document file uploaded'))
         else:
             flash_errors(form)
     return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
@@ -242,7 +258,7 @@ def resource_add_photos_check(chapter_id):
             chapter = LightChapter.query.get(chapter_id)
             chapter.resources.append(resource)
             chapter.update()
-            flash(notify_success('Homework file uploaded'))
+            flash(notify_success('Photo file uploaded'))
         else:
             flash_errors(form)
     return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
@@ -251,14 +267,14 @@ def resource_add_photos_check(chapter_id):
 @lightcourse_blueprint.route("/chapter/<chapter_id>/add/homework/check", methods=['GET', 'POST'])
 @roles_required(['admin', 'teacher'])
 @login_required
-def resource_add_homework_check(chapter_id):
+def add_homework_check(chapter_id):
     form = AddHomeworkForm()
     if request.method == 'POST':
         if form.validate_on_submit():
             filename = docs.save(request.files[form.file_input.data.name])
-            resource = LightResource(type='photo', filename=filename)
+            homework = LightHomework(filename=filename)
             chapter = LightChapter.query.get(chapter_id)
-            chapter.resources.append(resource)
+            chapter.homeworks.append(homework)
             chapter.update()
             flash(notify_success('Homework file uploaded'))
         else:

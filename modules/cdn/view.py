@@ -6,6 +6,7 @@ from modules.course.models import SubSection
 from modules.course.models import Resource
 
 from modules.lightcourse.models import LightResource
+from modules.lightcourse.models import LightHomework
 
 from flask import Blueprint
 from flask import send_from_directory
@@ -107,4 +108,31 @@ def light_resource_video(resource_id):
     resource = LightResource.query.get(resource_id)
     return send_from_directory(current_app.config['UPLOAD_VIDEO_FOLDER'],
                         resource.filename, 
+                           as_attachment=True)
+
+
+@cdn_blueprint.route('/lightcourse/resource/photo/<resource_id>', methods=["GET", "POST"])
+@login_required
+def light_resource_photo(resource_id):
+    resource = LightResource.query.get(resource_id)
+    return send_from_directory(current_app.config['UPLOADED_PHOTOS_DEST'],
+                        resource.filename, 
+                           as_attachment=True)
+
+
+@cdn_blueprint.route('/lightcourse/resource/doc/<resource_id>', methods=["GET", "POST"])
+@login_required
+def light_resource_doc(resource_id):
+    resource = LightResource.query.get(resource_id)
+    return send_from_directory(current_app.config['UPLOADED_ALLDOCS_DEST'],
+                        resource.filename, 
+                           as_attachment=True)
+
+
+@cdn_blueprint.route('/light_homework/<hwork_id>', methods=["GET", "POST"])
+@login_required
+def light_homework(hwork_id):
+    hwork = LightHomework.query.get(hwork_id)
+    return send_from_directory(current_app.config['UPLOADED_DOCS_DEST'],
+                           hwork.filename, 
                            as_attachment=True)

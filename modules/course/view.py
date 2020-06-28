@@ -5,6 +5,8 @@ import json
 from modules.auth.models import User
 from modules.auth.access import roles_required
 from modules.lightcourse.models import LightCourse
+from modules.lightcourse.models import LightHomeworkSubmission
+from modules.lightcourse.models import LightCertificateRequest
 
 from .models import Course
 from .models import Section
@@ -608,6 +610,7 @@ def list():
             (Course.submitted == True)
         )
     context['courses'] = display_courses
+    context['light_courses'] = LightCourse.query.all()
     context['User'] = User
     context['current_user'] = current_user
     return render_template('course/list.html', **context)
@@ -685,6 +688,8 @@ def view_certificate_request():
     if current_user.role == 'admin':
         certif_requests = CertificateRequest.query.all()
         context['certif_requests'] = certif_requests
+        light_certif_requests = LightCertificateRequest.query.all()
+        context['light_certif_requests'] = light_certif_requests
     else:
         c_requests = []
         for cert_request_item in CertificateRequest.query.all():
@@ -692,6 +697,13 @@ def view_certificate_request():
             if course.teacher_id == current_user.id:
                 c_requests.append(cert_request_item)
         context['certif_requests'] = c_requests
+
+        light_c_requests = []
+        for cert_request_item in LightCertificateRequest.query.all():
+            course = Course.query.get(cert_request_item.course_id)
+            if course.teacher_id == current_user.id:
+                light_c_requests.append(cert_request_item)
+        context['light_certif_requests'] = light_c_requests
     context['User'] = User
     context['Course'] = Course
     return render_template('course/certificate_requests.html', **context)
@@ -790,6 +802,7 @@ def view_homework_submissions():
     context = base_context()
     if current_user.role == 'admin':
         submissions = HomeworkSubmission.query.all()
+        light_submissions = LightHomeworkSubmission.query.all()
     else:
         submissions = []
         for submission in HomeworkSubmission.query.all():
@@ -797,7 +810,15 @@ def view_homework_submissions():
             teacher_id = submission.sub_section.section.course.teacher_id
             if current_user.id == teacher_id:
                 submissions.append(submission)
+
+        light_submissions = []
+        for submission in LightHomeworkSubmission.query.all():
+            teacher_id = submission.chapter.course.teacher_id
+            if current_user.id == teacher_id:
+                light_submissions.append(submission)
+
     context['submissions'] = submissions
+    context['light_submissions'] = light_submissions
     context['User'] = User
     return render_template('course/view_submissions.html', **context)
 

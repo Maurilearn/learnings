@@ -202,31 +202,49 @@
     href="{{url_for('cdn.light_homework', hwork_id=homework.id)}}"><i class="fa fa-file-download"></i></a> {{homework.filename}}</p>
 {%endfor%}
 
-<div class="card">
-    <div class="card-header">
-        Submit Homework
+<h3>Submit Homework</h3>
+<form
+class="" 
+method="POST" enctype="multipart/form-data"
+action="{{url_for('lightcourse.submit_homework_check', chapter_id=chapter.id)}}">
+
+  <div class="input-group mb-3">
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+    <div class="input-group-prepend">
+      <span class="input-group-text">{{submit_homework_form.file_input.label}}</span>
     </div>
-    <div class="card-body">
-        
+    {{submit_homework_form.file_input}}
+    <div class="input-group-append">
+      <input class="btn btn-info form-control" type=submit value=Upload >
     </div>
-</div>
+  </div>
+</form>
 
 <div class="card">
     <div class="card-header">
         Homework Submitted
     </div>
     <div class="card-body">
-        
+        {%for homework in chapter.homework_submissions%}
+            {%if homework.course_taker_id == current_user.id%}
+                <p><a href="{{url_for('cdn.light_homework_submitted', submission_id=homework.id)}}" class="btn btn-info"><i class="fa fa-file-download"></i></a> {{homework.filename}}</p>
+            {%endif%}
+        {%endfor%}
     </div>
 </div>
 
-
+<br>
 <div class="card">
     <div class="card-header">
         Homework Evaluated
     </div>
     <div class="card-body">
-        
+        {%for homework in chapter.homework_evaluations%}
+            {%if homework.course_taker_id == current_user.id%}
+                <p><a href="{{url_for('cdn.light_homework_evaluated', evaluation_id=homework.id)}}" class="btn btn-info"><i class="fa fa-file-download"></i></a> {{homework.filename}}</p>
+            Note: <b>{{homework.notes}}</b>
+            {%endif%}
+        {%endfor%}
     </div>
 </div>
 

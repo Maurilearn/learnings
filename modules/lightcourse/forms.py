@@ -16,6 +16,7 @@ from flask_wtf.file import FileRequired
 from shopyoapi.init import docs
 from shopyoapi.init import alldocs
 from shopyoapi.init import photos
+from shopyoapi.init import homeworksubmits
 
 def grade_query():
     from modules.course.models import Grade
@@ -110,5 +111,28 @@ class AddHomeworkForm(FlaskForm):
         render_kw={
             'class':'form-control',
             'autocomplete':'off',
+            }
+        )
+
+
+class SubmitHomeworkForm(FlaskForm):
+    file_input = FileField('Homework', validators=[
+        FileAllowed(homeworksubmits, 'Homework must be in pdf odt or docx'),
+        FileRequired('Homework was empty!')
+        ],
+        render_kw={
+            'class':'form-control',
+            'autocomplete':'off',
+            }
+        )
+
+
+class AddHomeworkNoteForm(FlaskForm):
+    notes = StringField('Notes', [
+        DataRequired()
+        ],
+        render_kw={
+                "class": "form-control",
+                "autocomplete": "off"
             }
         )

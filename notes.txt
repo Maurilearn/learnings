@@ -24,4 +24,6 @@ beautify certificate
 
 customise school info
 
-add grade
+[x] add grade
+[ ] add certif request
+[ ] add certif

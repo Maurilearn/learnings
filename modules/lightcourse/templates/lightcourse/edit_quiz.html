@@ -9,52 +9,27 @@
 
 
 {% block content %}
+{%set active_page='my_courses'%}
 {%include 'course/partials/nav.html'%}
-{%set active_page = 'manage'%}
 <br>
-<a class="btn btn-info"
-	href="{{url_for('course.index')}}">
-	back
-</a>
+
+
+<a 
+class="btn btn-info"
+href="{{url_for('lightcourse.view', course_id=course.id)}}">back</a>
 <br><br>
 
 <div> <!--form beg-->
 
-<div class="form-field">
-<label for="name">Name</label> <br>
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text"><i class="fa fa-book"></i></span>
-    </div>
-    <input autocomplete="off" class="form-control" id="course_name" name="chapter_name" required type="text" value="">
-</div>
-</div>
 
-<div class="form-field">
-Grade <br>
-<div class="input-group mb-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text"><i class="fa fa-book"></i></span>
-    </div>
-    <select class="form-control" id="chapter_grade" name="chapter_grade">
-        {%for grade in grades%}
-            <option value="{{grade.id}}">{{grade.name}}</option>
-        {%endfor%}
-    </select>
-</div>
-</div>
-
-
-
-
-
-<h2>Quiz</h2>
+<!--
 <div>
-    Quiz created: <span id="completed_quiz">0</span>/<span id="quiz_num"></span><br>
+    Quiz created: <span id="completed_quiz">0</span>/10<br>
     <div id="progress-bar" class="progress">
         <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
     </div><br>
 </div>
+-->
 
 <div class="row">
     <div class="col-sm-1">
@@ -98,36 +73,36 @@ Grade <br>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<h2>Chapters [<span id="chapters-counter-display">1</span>]</h2>
 
-<button type="button" class="btn btn-info" id="chapter-plus">
-    <i class="fa fa-plus"></i>
-</button>
-<button type="button" class="btn btn-info" id="chapter-minus">
-    <i class="fa fa-minus"></i>
-</button>
-<br><br>
-<div id="chapters">
-    <div id="chapter_row_1">
-        1. <input type="text" id="chapter_name_1" class="form-control"><br>
-        <textarea class="form-control" rows="10" id="chapter_text_1"
-        ></textarea>
-        <div id="chapter_render_1"></div>
-        <script type="text/javascript">
-            jQuery('#chapter_text_1').on('input', function() {
-                document.getElementById('chapter_render_1').innerHTML=marked($('#chapter_text_1').val());
-            });
-        </script>
-    </div>
-</div>
 
-<br>
 <button id="submit" class="btn btn-info">Submit</button>
 <input id="csrf_token" name="csrf_token" type="hidden" value="">
 </div><!--form end-->
 
-
+<script type="text/javascript">
+    
+        var json_submit_data = {
+            "quizes":{
+                {%for quiz in course.quizzes%}
+                {{loop.index}}:{
+                    "question":"{{quiz.question.strip('"') | safe}}",
+                    "answers":[
+                        {%for answer in quiz.answers%}
+                            {
+                                "string":"{{answer.string.strip('"').replace('"', '\\"') | safe}}",
+                                {%if answer.correct%}
+                                    "correct":true
+                                {%else%}
+                                    "correct":false
+                                {%endif%}
+                            },
+                        {%endfor%}
+                    ]
+                },
+                {%endfor%}
+            }
+        };
+</script>
 <script type="text/javascript">
 function print() {
     var sep = ' ';
@@ -213,9 +188,7 @@ $( document ).ready(function() {
     function init_json(num_quiz){
         var init_json_submit = {
             "csrf":csrf_token,
-            "course_name": "",
-            "grade_id": "",
-            "chapters": [],
+            "section_name": "",
             "quizes":{
                 
             }
@@ -252,42 +225,28 @@ $( document ).ready(function() {
         }
         return true;
     }
-    function not_course_name_empty(){
-        if ($('#course_name').val().trim() === ''){
-            alert('course name cannot be empty');
+    function not_section_name_empty(){
+        if ($('#section-name').val().trim() === ''){
+            alert('section name cannot be empty');
             return false;
         }
         return true;
-    }
-    function not_chapter_content_empty(){
-        var empty_chapter_name = $('[id^="chapter_name_"]').filter(function() {
-        return this.value === "";
-        });
-        //print(empty.length);
-        if(empty_chapter_name.length) { //at least one empty
-            alert('all chapter names must be filled');
-            return false;
-        }
-
-        var empty_chapter_text = $('[id^="chapter_text_"]').filter(function() {
-        return $(this).val().trim() === "";
-        });
-        //print(empty.length);
-        if(empty_chapter_text.length) { //at least one empty
-            alert('all chapter text must be filled');
-            return false;
-        }
-        return true
     }
     function update_json(){
         json_submit['quizes'][current_quiz.toString()]['question'] = $('#question').val();
         var count = 1;
         json_submit['quizes'][current_quiz.toString()]['answers'] = [];
         $('[id^="row_"]').each(function() {
+            print('current quiz', current_quiz)
             json_submit['quizes'][current_quiz.toString()]['answers'].push({
                 "string":$('[name="answer_'+count.toString()+'"]').val(),
                 "correct":$('[name="correct_'+count.toString()+'"]').prop("checked")
                 });
+            print('count', count)
+            print({
+                "string":$('[name="answer_'+count.toString()+'"]').val(),
+                "correct":$('[name="correct_'+count.toString()+'"]').prop("checked")
+                })
             count += 1;
         });
     }
@@ -313,6 +272,11 @@ $( document ).ready(function() {
             qn += 1;
         }
     }
+
+    function load_first_quiz(){
+        quiz = json_submit['quizes'][1]
+        $('#question').val(quiz['question']);
+    }
     /*
     "quizes":{
     1:{
@@ -336,9 +300,14 @@ $( document ).ready(function() {
     var num_quiz = {{NUM_QUIZ}};
     var completed_quiz = 0;
     var current_quiz = 1;
-    var json_submit = init_json(num_quiz);
+    // var json_submit = init_json(num_quiz);
+    var json_submit = json_submit_data;
+    // print(json_submit);
+    var ansNum = 1;
+    load_json();
     print(json_submit);
-    $('#quiz_num').html(num_quiz);
+
+
     $("#prev").click(function(){
 
         
@@ -351,7 +320,10 @@ $( document ).ready(function() {
             print(json_submit);
             update_completed();
             load_json();
+        }else if(current_quiz < 0){
+            current_quiz = 1;
         }
+        print(json_submit);
         
     });
     $("#next").click(function(){
@@ -366,45 +338,30 @@ $( document ).ready(function() {
             update_completed();
             load_json();
         }
-
+        print(json_submit);
     });
     $("#submit").click(function(){
+        print(json_submit);
         update_completed();
-        if(
-            not_quiz_empty() & 
-            not_course_name_empty() & 
-            get_num_empty_quiz() <= 1 &
-            not_chapter_content_empty()){
+        if(not_quiz_empty() & get_num_empty_quiz() <= 1){
             // alert('ready to submit');
-            json_submit['course_name'] = $("#course_name").val().trim();
-            json_submit['grade_id'] = $('#chapter_grade').children("option:selected").prop('value');
-            c_count = 1;
-            json_submit['chapters'] = [];
-            $('[id^="chapter_row_"]').each(function() {
-                json_submit['chapters'].push({
-                    "name":$('#chapter_name_'+c_count.toString()).val(),
-                    "text":$('#chapter_text_'+c_count.toString()).val()
-                    });
-                c_count += 1;
-            });
-
-            if(json_submit['quizes'][(num_quiz).toString()]['answers'].length === 0){
+            //json_submit['section_name'] = $("#section-name").val().trim();
+            if(json_submit['quizes'][({{NUM_QUIZ}}).toString()]['answers'].length === 0){
                 update_json();
                 update_completed();
             }
-            print(json_submit);
-            
+            update_json();
             $.ajax({
 
                 type: "POST",
-                url: "{{url_for('lightcourse.add_check')}}",
+                url: "{{url_for('lightcourse.edit_quiz_check', course_id=course.id)}}",
                 // The key needs to match your method's input parameter (case-sensitive).
                 data: JSON.stringify(json_submit),
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function(data){
                     // alert(data);
-                    window.location.reload();
+                    window.location.replace(data['go_to']);
                     return false;
                 },
                 failure: function(errMsg) {
@@ -440,38 +397,7 @@ $( document ).ready(function() {
         }
     });
 
-    /*Chapters*/
-    chapNum = 1;
-    $( "#chapter-plus" ).click(function() {
-        chapNum += 1;
-        row = `
-        <div id="chapter_row_${chapNum}">
-            ${chapNum}. <input class="form-control" id='chapter_name_${chapNum}' type="text"><br>
-            <textarea class="form-control" rows="10" id="chapter_text_${chapNum}"></textarea>
-            <div id="chapter_render_${chapNum}"></div>
-        
-        </div>`;
-
-        $('#chapters').append(row);
-        $('#chapters-counter-display').html(chapNum);
-        $(document).on('input', '#chapter_text_'+chapNum,function(){
-            document.getElementById('chapter_render_'+chapNum).innerHTML = marked(
-                $('#chapter_text_'+chapNum).val());
-        })
-
-    });
-    $(document).on('click','#chapter-minus',function() {
-        if (chapNum > 1) {
-            
-            $('#chapter_row_'+chapNum.toString()).remove()
-            chapNum -= 1;
-            $('#chapters-counter-display').html(chapNum);
-        }
-    });
-
 /*end*/
 });
 </script>
-
-
 {% endblock %}

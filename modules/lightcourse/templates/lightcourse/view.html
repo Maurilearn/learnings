@@ -35,12 +35,31 @@
                 {{teacher.name}}
                 {%if current_user.id == course.teacher_id%}
                 <br><br>
-                <a href="" class="btn btn-warning"><i class="fa fa-pencil-alt"></i> edit quiz</a>
-                <a href="" class="btn btn-danger"><i class="fa fa-trash"></i> delete</a>
+                <a href="{{url_for('lightcourse.edit_quiz', course_id=course.id)}}" 
+                    class="btn btn-warning"><i class="fa fa-pencil-alt"></i> edit quiz</a>
+                <a href="{{url_for('lightcourse.delete', course_id=course.id)}}" 
+                    class="btn btn-danger"
+                    onClick="return confirm('Are you sure you wish to delete?');"><i class="fa fa-trash"></i> delete</a>
                 {%endif%}
             </div>
             <div class="card-body">
-                <a href="" class="btn btn-info"><i class="fa fa-question"></i> take quiz</a><br><hr>
+                <a 
+                href="{{url_for('lightcourse.take_quiz', course_id=course.id)}}" 
+                class="btn btn-info"><i class="fa fa-question"></i> take quiz</a>
+                {%if quiz_completed()%}
+                    <i style="color: green" class="fa fa-check-circle"></i> Quiz completed
+
+                    <br><br>
+                    {%if certif_approved()%}
+                        <a href="{{url_for('cdn.light_certificate', course_id=course.id)}}" 
+                            class="btn btn-info">view certificate</a>
+                    {%elif request_exists()%}
+                        certificate being processed
+                    {%else%}
+                        <a href="{{url_for('lightcourse.request_certificate', course_id=course.id)}}" class="btn btn-success">request certificate</a>
+                    {%endif%}
+                {%endif%}
+                <br><hr>
                 {%for chapter in course.chapters%}
                     
                     {%if current_user.id == course.teacher_id%}

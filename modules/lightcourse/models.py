@@ -48,7 +48,7 @@ class LightCourse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     created_date = db.Column(db.DateTime, default=datetime.now())
-    submitted = db.Column(db.Boolean, default=False)
+    submitted = db.Column(db.Boolean, default=True)
     teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'),
         nullable=False)
     grade_id = db.Column(db.Integer, db.ForeignKey('grades.id'),
@@ -56,6 +56,12 @@ class LightCourse(db.Model):
     chapters = db.relationship('LightChapter', backref='course', lazy=True,
         cascade="all, delete, delete-orphan")
     quizzes = db.relationship('LightQuiz', backref='course', lazy=True,
+        cascade="all, delete, delete-orphan")
+    light_certificate = db.relationship('LightCertificate', backref='course', lazy=True,
+        cascade="all, delete, delete-orphan", uselist=False)
+    light_certificate_requests = db.relationship('LightCertificateRequest', backref='course', lazy=True,
+        cascade="all, delete, delete-orphan")
+    light_quiz_histories = db.relationship('LightQuizHistory', backref='course', lazy=True,
         cascade="all, delete, delete-orphan")
 
     def insert(self):

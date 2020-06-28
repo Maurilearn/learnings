@@ -14,6 +14,7 @@
 {%include 'course/partials/nav.html'%}
 
 <br>
+<h3>Full Courses</h3>
 <table class="table">
   <thead>
     <tr>
@@ -37,6 +38,37 @@
           <a 
             class="btn btn-info" 
             href="{{url_for('course.evaluate_homework_submission', submission_id=submission.id)}}">
+            Evaluate
+          </a>
+        </td>
+      </tr>
+    {%endfor%}
+  </tbody>
+</table>
+<br>
+<h3>Regular Courses</h3>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Info</th>
+      <th>User</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {%for submission in light_submissions%}
+      {%set course_taker = User.query.get(submission.course_taker_id) %}
+      <tr>
+        <td>
+        Course: {{submission.chapter.course.name}}<br>
+        Chapter: {{submission.chapter.name}}
+        <td>
+        {{course_taker.name}} ({{course_taker.email}})
+        </td>
+        <td>
+          <a 
+            class="btn btn-info" 
+            href="{{url_for('lightcourse.evaluate_homework_submission', submission_id=submission.id)}}">
             Evaluate
           </a>
         </td>

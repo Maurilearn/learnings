@@ -7,6 +7,9 @@ from modules.course.models import Resource
 
 from modules.lightcourse.models import LightResource
 from modules.lightcourse.models import LightHomework
+from modules.lightcourse.models import LightHomeworkSubmission
+from modules.lightcourse.models import LightHomeworkEvaluation
+from modules.lightcourse.models import LightCertificate 
 
 from flask import Blueprint
 from flask import send_from_directory
@@ -136,3 +139,56 @@ def light_homework(hwork_id):
     return send_from_directory(current_app.config['UPLOADED_DOCS_DEST'],
                            hwork.filename, 
                            as_attachment=True)
+
+
+@cdn_blueprint.route('/light_homework/submitted/<submission_id>', methods=["GET", "POST"])
+@login_required
+def light_homework_submitted(submission_id):
+    submission = LightHomeworkSubmission.query.get(submission_id)
+    teacher_id = submission.chapter.course.teacher_id
+    if (current_user.id == submission.course_taker_id or 
+        current_user.role == 'admin' or
+        current_user.id == teacher_id
+        ):
+        return send_from_directory(current_app.config['UPLOADED_HOMEWORKSUBMITS_DEST'],
+                           submission.filename, 
+                           as_attachment=True)
+    else:
+        return 'No permission to view file'
+
+
+@cdn_blueprint.route('/light_homework/evaluated/<evaluation_id>', methods=["GET", "POST"])
+@login_required
+def light_homework_evaluated(evaluation_id):
+    evaluation = LightHomeworkEvaluation.query.get(evaluation_id)
+    teacher_id = evaluation.chapter.course.teacher_id
+    if (current_user.id == evaluation.course_taker_id or 
+        current_user.role == 'admin' or
+        current_user.id == teacher_id
+        ):
+        return send_from_directory(current_app.config['UPLOADED_HOMEWORKSUBMITS_DEST'],
+                           evaluation.filename, 
+                           as_attachment=True)
+    else:
+        return 'No permission to view file'
+
+
+@cdn_blueprint.route('/light_certificate/<course_id>', methods=["GET", "POST"])
+@login_required
+def light_certificate(course_id):
+    # app.config['UPLOAD_FOLDER']
+    certif = LightCertificate.query.filter(
+        (LightCertificate.course_taker_id == current_user.id) &
+        (LightCertificate.course_id == course_id)
+        ).first() # course completed
+    if certif:
+        # '''
+        return send_from_directory(current_app.config['UPLOAD_CERTIFICATES_FOLDER'],
+                           certif.filename)
+        # '''
+        '''
+        return '{}<br>{}'.format(current_app.config['UPLOAD_CERTIFICATES_FOLDER'],
+            certif.filename)
+            '''
+    else:
+        return "You can't view this certificate"

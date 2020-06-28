@@ -1,5 +1,6 @@
 import json
 import os
+import datetime
 
 from werkzeug import secure_filename
 
@@ -13,6 +14,11 @@ from .models import LightCourse
 from .models import LightChapter
 from .models import LightResource
 from .models import LightHomework
+from .models import LightHomeworkSubmission
+from .models import LightHomeworkEvaluation
+from .models import LightQuizHistory
+from .models import LightCertificateRequest
+from .models import LightCertificate
 
 from flask import Blueprint
 from flask import url_for
@@ -48,6 +54,10 @@ from .forms import AddTextForm
 from .forms import AddDocsForm
 from .forms import AddHomeworkForm
 from .forms import AddPhotosForm
+from .forms import SubmitHomeworkForm
+from .forms import AddHomeworkNoteForm
+
+from reportlab.pdfgen import canvas
 
 lightcourse_blueprint = Blueprint(
     "lightcourse",
@@ -68,6 +78,7 @@ def add():
     context = base_context()
     form =  AddLightCourseForm()
     context['grades'] = Grade.query.all()
+    context['NUM_QUIZ'] = current_app.config['LIGHTCOURSE_QUIZ_NUM']
     return render_template('lightcourse/add.html', **context)
 
 @lightcourse_blueprint.route("/add/check", methods=['GET', 'POST'])
@@ -117,7 +128,44 @@ def view(course_id):
     context['form'] = form
     context['User'] = User
 
+    def quiz_completed():
+        if LightQuizHistory.query.filter(
+                (LightQuizHistory.person_id == current_user.id) &
+                (LightQuizHistory.light_course_id == course.id)
+                ).first():
+            return True
+        return False
+    def request_exists():
+        if LightCertificateRequest.query.filter(
+                (LightCertificateRequest.course_taker_id == current_user.id) &
+                (LightCertificateRequest.course_id == course.id)
+                ).first():
+            return True
+        return False
+
+    def certif_approved():
+        if LightCertificate.query.filter(
+                (LightCertificate.course_taker_id == current_user.id) &
+                (LightCertificate.course_id == course.id)
+                ).first():
+            return True
+        return False
+
+
+    context['quiz_completed'] = quiz_completed
+    context['request_exists'] = request_exists
+    context['certif_approved'] = certif_approved
     return render_template('lightcourse/view.html', **context)
+
+
+@lightcourse_blueprint.route("/<course_id>/delete", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def delete(course_id):
+    course  = LightCourse.query.get(course_id)
+    course.delete()
+    flash(notify_danger('course deleted!'))
+    return redirect(url_for('course.index'))
 
 
 @lightcourse_blueprint.route("/<course_id>/add/chapter", methods=['GET', 'POST'])
@@ -148,6 +196,7 @@ def view_chapter(chapter_id):
     context['add_docs_form'] = AddDocsForm()
     context['add_photos_form'] = AddPhotosForm()
     context['add_homework_form'] = AddHomeworkForm()
+    context['submit_homework_form'] = SubmitHomeworkForm()
     return render_template('lightcourse/view_chapter.html', **context)
 
 
@@ -280,3 +329,279 @@ def add_homework_check(chapter_id):
         else:
             flash_errors(form)
     return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
+
+
+
+@lightcourse_blueprint.route("/chapter/<chapter_id>/submit/homework/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def submit_homework_check(chapter_id):
+    form = SubmitHomeworkForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            filename = homeworksubmits.save(request.files[form.file_input.data.name])
+            homework_submit = LightHomeworkSubmission(filename=filename, course_taker_id=current_user.id)
+            chapter = LightChapter.query.get(chapter_id)
+            chapter.homework_submissions.append(homework_submit)
+            chapter.update()
+            flash(notify_success('Homework file submitted for evaluation'))
+        else:
+            flash_errors(form)
+    return redirect(url_for('lightcourse.view_chapter', chapter_id=chapter_id))
+
+@lightcourse_blueprint.route("/homework/submission/<submission_id>/evaluate", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def evaluate_homework_submission(submission_id):
+    context = base_context()
+    context['submission'] = LightHomeworkSubmission.query.get(submission_id)
+    context['User'] = User
+    form = AddHomeworkNoteForm()
+    context['form'] = form
+    return render_template('lightcourse/evaluate_homework.html', **context)
+
+
+@lightcourse_blueprint.route("/homework/submission/<submission_id>/evaluate/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def evaluate_homework_submission_check(submission_id):
+    if request.method == 'POST':
+        form = AddHomeworkNoteForm()
+        if form.validate_on_submit():
+            submission = LightHomeworkSubmission.query.get(submission_id)
+            course_taker_id = submission.course_taker_id
+            chapter_id = submission.chapter_id
+            notes = form.notes.data
+            hwork_eval = LightHomeworkEvaluation(
+                course_taker_id=course_taker_id,
+                chapter_id=chapter_id,
+                notes=notes,
+                filename=submission.filename
+                )
+            submission.delete()
+            hwork_eval.insert()
+        else:
+            flash_errors(form)
+        return redirect(url_for('course.view_homework_submissions'))
+
+@lightcourse_blueprint.route("/<course_id>/quiz", methods=['GET', 'POST'])
+@login_required
+def take_quiz(course_id):
+    context = base_context()
+    course = LightCourse.query.get(course_id)
+    context['course'] = course
+    # https://stackoverflow.com/questions/60805/getting-random-row-through-sqlalchemy
+    return render_template('lightcourse/take_quiz.html', **context)
+
+
+@lightcourse_blueprint.route("/<course_id>/quiz/check", methods=['GET', 'POST'])
+@login_required
+def check_quiz(course_id):
+    if request.method == 'POST':
+        correct_answers = 0
+        # flash(notify_info(request.form))
+        course = LightCourse.query.get(course_id)
+        submitted_quiz = [name for name in request.form if name.startswith('quiz_')]
+        # flash(notify_info(submitted_quiz))
+        db_json  = {}
+        if len(submitted_quiz) == 0:
+            flash(notify_warning("Can't be empty"))
+        else:
+            quiz_seen = {}
+            for quiz_name in submitted_quiz:
+                info = quiz_name.split('_')
+                q_id = info[1]
+                a_id = info[3]
+                if q_id not in quiz_seen:
+                    quiz_seen[int(q_id)] = []
+                quiz_seen[int(q_id)].append(int(a_id))
+            # flash(notify_info(quiz_seen))
+            if len(quiz_seen) != current_app.config['LIGHTCOURSE_QUIZ_NUM']:
+                flash(notify_warning('All questions must be answered!'))
+            
+            else:
+                for quiz in course.quizzes:
+                    db_json[quiz.id] = []
+                    for answer in quiz.answers:
+                        if answer.correct == True:
+                            db_json[quiz.id].append((answer.id))
+                # flash(notify_info(db_json))
+
+                for q in db_json:
+                    if quiz_seen[q] == db_json[q]:
+                        correct_answers += 1
+                
+                if (correct_answers/current_app.config['LIGHTCOURSE_QUIZ_NUM'])*100 >= 50:
+                    quiz_history = LightQuizHistory(person_id=current_user.id, light_course_id=course.id)
+                    quiz_history.insert()
+                    flash(notify_success('Great! correct answers: {}/{}'.format(correct_answers,
+                        current_app.config['LIGHTCOURSE_QUIZ_NUM'])))
+                else:
+                    flash(notify_warning('Oh oh! correct answers: {}/{}'.format(correct_answers,
+                        current_app.config['LIGHTCOURSE_QUIZ_NUM'])))
+        return redirect(url_for('lightcourse.take_quiz', course_id=course.id))
+
+
+@lightcourse_blueprint.route("/<course_id>/certificate/request", methods=['GET', 'POST'])
+@login_required
+def request_certificate(course_id):
+    req = LightCertificateRequest(
+        course_id=course_id,
+        course_taker_id=current_user.id
+        )
+    req.insert()
+    return redirect(url_for('lightcourse.view', course_id=course_id))
+
+
+@lightcourse_blueprint.route("/certificate/<certif_req_id>/approve", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def approve_certif_req(certif_req_id):
+    certif_request = LightCertificateRequest.query.get(certif_req_id)
+    course = LightCourse.query.get(certif_request.course_id)
+    if not course:
+        flash(notify_warning('Course no longer exist'))
+        certif_request.delete()
+        return redirect(url_for('course.view_certificate_request'))
+    if not (current_user.id == course.teacher_id or current_user.role == 'admin'):
+        return "You don't have permission to approve"
+    course_taker_id = certif_request.course_taker_id
+    course_id = certif_request.course_id
+    certif_request.delete()
+    certif = LightCertificate(
+        course_taker_id=course_taker_id,
+        course_id=course_id
+        )
+    
+
+    person = User.query.get(course_taker_id)
+    course = LightCourse.query.get(course_id)
+    person_name = person.name.replace(' ', '_').replace('-', '_')
+    course_name = course.name.replace(' ', '_')
+    #flash(notify_info('{}'.format(os.getcwd())))
+    
+    try:
+        dirname = current_app.config['UPLOAD_CERTIFICATES_FOLDER']
+        try:
+            os.mkdir(dirname)
+        except:
+            pass
+        filename = "{}_{}.pdf".format(person_name, course_name)
+        fname = os.path.join(dirname, filename)
+        # flash(notify_info(fname))
+        #with open(fname, 'w+') as f:
+        #    f.write('')
+        c = canvas.Canvas(fname)
+        c.setTitle("Certificate")
+        init_y = 250
+        c.drawString(100, init_y,"Certificate Awarded To")
+        init_y -= 20
+        c.drawString(100, init_y, person.name)
+        init_y -= 20
+        c.drawString(100, init_y,"For")
+        init_y -= 20
+        c.drawString(100, init_y, course.name)
+        init_y -= 20
+        c.drawString(100, init_y, "On")
+        init_y -= 20
+        datetime_now = datetime.datetime.now()
+        datenow = '{} - {} - {}'.format(
+            datetime_now.year, 
+            datetime_now.month, 
+            datetime_now.day)
+        c.drawString(100, init_y, datenow)
+        c.save()
+        certif.filename = filename
+        certif.insert()
+    except Exception as e:
+        flash(notify_danger('{}'.format(e)))
+    return redirect(url_for('course.view_certificate_request'))
+
+
+@lightcourse_blueprint.route("/certificate/<certif_req_id>/decline", methods=['GET', 'POST'])
+@login_required
+def decline_certif_req(certif_req_id):
+    certif_request = LightCertificateRequest.query.get(certif_req_id)
+    course_taker_id = certif_request.course_taker_id
+    course_id = certif_request.course_id
+    course = lightCourse.query.get(course_id)
+    if not course:
+        flash(notify_warning('Course no longer exist'))
+        certif_request.delete()
+        return redirect(url_for('course.view_certificate_request'))
+    if not (current_user.id == course.teacher_id or current_user.role == 'admin'):
+        return "You don't have permission to approve"
+    certif_request.delete()
+    return redirect(url_for('course.view_certificate_request'))
+
+
+@lightcourse_blueprint.route("/<course_id>/subscribe", methods=['GET', 'POST'])
+@login_required
+def toggle_subscribe(course_id):
+    course = LightCourse.query.get(course_id)
+    if course not in current_user.light_courses:
+        current_user.light_courses.append(course)
+        current_user.update()
+        flash(notify_success('Subscribed to {}!'.format(course.name)))
+    elif course in current_user.light_courses:
+        current_user.light_courses.remove(course)
+        current_user.update()
+        flash(notify_warning('Unsubscribed from {}!'.format(course.name)))
+    return redirect(url_for('course.list'))
+
+
+@lightcourse_blueprint.route("/<course_id>/quiz/edit", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def edit_quiz(course_id):
+    '''
+    var init_json_submit = {
+            "section_name": "",
+            "quizes":{
+                
+            }
+        }
+        /*answer {"string":"", "correct":""}*/
+        var empty_quiz = {
+            "question":"",
+            "answers":[
+                
+            ]
+        }
+    '''
+    context = base_context()
+    course = LightCourse.query.get(course_id)
+    context['course'] = course
+    context['NUM_QUIZ'] = current_app.config['LIGHTCOURSE_QUIZ_NUM']
+    return render_template('lightcourse/edit_quiz.html', **context)
+
+
+@lightcourse_blueprint.route("/<course_id>/quiz/edit/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def edit_quiz_check(course_id):
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            course = LightCourse.query.get(course_id)
+            course.quizzes[:] = []
+            for quiz in data['quizes']:
+                question = data['quizes'][quiz]['question']
+                question = json.dumps(question)
+                current_quiz = Quiz(question=question)
+                answers = data['quizes'][quiz]['answers']
+                for answer in answers:
+                    ans = answer['string']
+                    ans = json.dumps(ans)
+                    current_quiz.answers.append(
+                        Answer(string=ans, correct=answer['correct']))
+                course.quizzes.append(current_quiz)
+            
+            course.update()
+            return jsonify({
+            "submission": "ok",
+            "go_to":url_for('lightcourse.view', course_id=course_id)})
+    except:
+        flash(notify_info(data))
+        return jsonify({
+            "submission": "bad"})

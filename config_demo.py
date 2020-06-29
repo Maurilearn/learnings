@@ -11,7 +11,7 @@ with open(os.path.join(base_path, 'config.json')) as f:
     json_info = json.load(f)
 
 def check_environ(env_var_name):
-    if env_var_name in os.environ:
+    if env_var_name in  os.environ:
         return os.environ[env_var_name]
     else:
         print('[DANGER] Environment variable not found:', env_var_name)
@@ -40,10 +40,13 @@ class Config:
 
     UPLOAD_VIDEO_FOLDER = os.path.join(STATIC_DIR, 'uploads/video')
     UPLOAD_CERTIFICATES_FOLDER = os.path.join(STATIC_DIR, 'certificates')
-    UPLOADED_PHOTOS_DEST = os.path.join(STATIC_DIR, 'img')
+    UPLOADED_PHOTOS_DEST = os.path.join(STATIC_DIR, 'uploads/img')
     UPLOADED_PHOTOS_ALLOW = ('png', 'jpg', 'jpeg')
-    UPLOADED_DOCS_DEST = os.path.join(STATIC_DIR, 'uploads/docs')
+    UPLOADED_DOCS_DEST = os.path.join(STATIC_DIR, 'uploads/homeworks') # must change to homework
     UPLOADED_DOCS_ALLOW = ('pdf', 'docx', 'odt')
+    UPLOADED_ALLDOCS_DEST = os.path.join(STATIC_DIR, 'uploads/alldocs')
+    UPLOADED_ALLDOCS_ALLOW = ('rtf', 'odf', 'ods', 'gnumeric', 'abw', 'doc', 
+        'docx', 'xls', 'xlsx', 'ppt', 'pdf')
     UPLOADED_HOMEWORKSUBMITS_DEST = os.path.join(STATIC_DIR, 'uploads/homework_submits')
     UPLOADED_HOMEWORKSUBMITS_ALLOW = ('pdf', 'docx', 'odt')
 
@@ -53,6 +56,7 @@ class Config:
     SMTP_PASS = ''
 
     DEFAULT_PASS_ALL = 'pass'
+    LIGHTCOURSE_QUIZ_NUM = 2
 
 
 class DevelopmentConfig(Config):

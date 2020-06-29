@@ -1,5 +1,5 @@
 {
-    "environment": "",
+    "environment": "development",
     "admins": [
       {
       "email": "arj.python@gmail.com",

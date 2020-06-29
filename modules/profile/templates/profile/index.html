@@ -38,11 +38,21 @@
                     </tr>
                     <tr>
                         <td><i class="fa fa-chalkboard"></i></td>
-                        <td style="font-style: capitalize;">{{num_enrolled}}/{{num_available}}</td>
+                        <td style="font-style: capitalize;">Enrolled: {{num_enrolled}}</td>
                     </tr>
                     <tr>
+                        <td><i class="fa fa-chalkboard"></i></td>
+                        <td style="font-style: capitalize;">Available: {{num_available}}</td>
+                    </tr>
+                    {%if current_user.role == 'student'%}
+                    <tr>
+                        <td><i class="fa fa-chalkboard"></i></td>
+                        <td style="font-style: capitalize;">Available for you: {{num_available_specific}}</td>
+                    </tr>
+                    {%endif%}
+                    <tr>
                         <td><i class="fa fa-certificate"></i></td>
-                        <td style="font-style: capitalize;">{{num_completed}}</td>
+                        <td style="font-style: capitalize;">Completed: {{num_completed}}</td>
                     </tr>
                     {%endif%}
                     <tr>

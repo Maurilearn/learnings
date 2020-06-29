@@ -17,7 +17,7 @@
 <a class="btn btn-info" href="{{url_for('course.add')}}"><i class="fa fa-plus"></i> Add Full Course</a>
 {%endif%}
 
-<br>
+<br><br>
 <h2>Full Courses</h2>
 <div style="overflow-x: scroll;">
 
@@ -26,6 +26,7 @@
         <tr>
             <th>Name</th>
             <th>Author</th>
+            <th>Grade</th>
             {%if current_user.role == 'teacher'%}
             <th>Action</th>
             {%endif%}
@@ -38,6 +39,7 @@
     <tr>
         <td>{{course.name}}</td>
         <td>{{teacher.name}}</td>
+        <td>{{course.grade}}</td>
         {%if current_user.role == 'teacher'%}
         <td>
             <a class="btn btn-info" href="{{url_for('course.view', course_id=course.id)}}">
@@ -69,6 +71,7 @@
         <tr>
             <th>Name</th>
             <th>Author</th>
+            <th>Grade</th>
             {%if current_user.role == 'teacher'%}
             <th>Action</th>
             {%endif%}
@@ -81,6 +84,7 @@
     <tr>
         <td>{{course.name}}</td>
         <td>{{teacher.name}}</td>
+        <td>{{course.grade}}</td>
         {%if current_user.role == 'teacher'%}
         <td>
             

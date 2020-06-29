@@ -72,9 +72,10 @@
 {%include 'course/partials/nav.html'%}
 <br>
 
-<a href="{{url_for('course.index')}}" class="btn btn-info"><i class="fa fa-long-arrow-alt-left"></i> back</a>
+
 
 {%if course.teacher_id == current_user.id or current_user.role == 'admin'%}
+<a href="{{url_for('course.index')}}" class="btn btn-info"><i class="fa fa-long-arrow-alt-left"></i> back</a>
 
 <form
     method="POST"

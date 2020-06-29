@@ -193,6 +193,7 @@
     {%endif%}
 {%endfor%}
 
+<br>
 <h2>Homeworks</h2>
 
 
@@ -202,7 +203,7 @@
     href="{{url_for('cdn.light_homework', hwork_id=homework.id)}}"><i class="fa fa-file-download"></i></a> {{homework.filename}}</p>
 {%endfor%}
 
-<h3>Submit Homework</h3>
+Submit Homework<br>
 <form
 class="" 
 method="POST" enctype="multipart/form-data"

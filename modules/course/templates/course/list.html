@@ -24,32 +24,66 @@
                 Teacher
             </th>
             <th>
+                Grade
+            </th>
+            <th>
                 Subscribed
             </th>
         </tr>
     </thead>
     <tbody>
         {%for course in courses%}
-            {%set teacher = User.query.get(course.teacher_id)%}
-            <tr>
-                <td>
-                {{course.name}}
-                </td>
-                <td>
-                {{teacher.name}}
-                </td>
-                <td>
-                    <a 
-                    class="cancel-link" 
-                    href="{{url_for('course.toggle_subscribe', course_id=course.id)}}">
-                        {%if course in current_user.courses%}
-                            <i class="fa fa-check-circle" style="color:green"></i>
-                        {% else %}
-                            <i class="fa fa-times-circle" style="color: red;"></i>
-                        {%endif%}
-                    </a>
-                </td>
-            </tr>
+            {%if current_user.role == 'student'%}
+                {%if course.grade_id == current_user.grade_id%}
+                    {%set teacher = User.query.get(course.teacher_id)%}
+                    <tr>
+                        <td>
+                        {{course.name}}
+                        </td>
+                        <td>
+                        {{teacher.name}}
+                        </td>
+                        <td>
+                            {{course.grade}}
+                        </td>
+                        <td>
+                            <a 
+                            class="cancel-link" 
+                            href="{{url_for('course.toggle_subscribe', course_id=course.id)}}">
+                                {%if course in current_user.courses%}
+                                    <i class="fa fa-check-circle" style="color:green"></i>
+                                {% else %}
+                                    <i class="fa fa-times-circle" style="color: red;"></i>
+                                {%endif%}
+                            </a>
+                        </td>
+                    </tr>
+                {%endif%}
+            {%else%}
+                {%set teacher = User.query.get(course.teacher_id)%}
+                <tr>
+                    <td>
+                    {{course.name}}
+                    </td>
+                    <td>
+                    {{teacher.name}}
+                    </td>
+                    <td>
+                        {{course.grade}}
+                    </td>
+                    <td>
+                        <a 
+                        class="cancel-link" 
+                        href="{{url_for('course.toggle_subscribe', course_id=course.id)}}">
+                            {%if course in current_user.courses%}
+                                <i class="fa fa-check-circle" style="color:green"></i>
+                            {% else %}
+                                <i class="fa fa-times-circle" style="color: red;"></i>
+                            {%endif%}
+                        </a>
+                    </td>
+                </tr>
+            {%endif%}
         {%endfor%}
         
     </tbody>
@@ -67,32 +101,66 @@
                 Teacher
             </th>
             <th>
+                Grade
+            </th>
+            <th>
                 Subscribed
             </th>
         </tr>
     </thead>
     <tbody>
         {%for course in light_courses%}
-            {%set teacher = User.query.get(course.teacher_id)%}
-            <tr>
-                <td>
-                {{course.name}}
-                </td>
-                <td>
-                {{teacher.name}}
-                </td>
-                <td>
-                    <a 
-                    class="cancel-link" 
-                    href="{{url_for('lightcourse.toggle_subscribe', course_id=course.id)}}">
-                        {%if course in current_user.light_courses%}
-                            <i class="fa fa-check-circle" style="color:green"></i>
-                        {% else %}
-                            <i class="fa fa-times-circle" style="color: red;"></i>
-                        {%endif%}
-                    </a>
-                </td>
-            </tr>
+            {%if current_user.role == 'student'%}
+                {%if course.grade_id == current_user.grade_id%}
+                    {%set teacher = User.query.get(course.teacher_id)%}
+                    <tr>
+                        <td>
+                        {{course.name}}
+                        </td>
+                        <td>
+                        {{teacher.name}}
+                        </td>
+                        <td>
+                        {{course.grade}}
+                        </td>
+                        <td>
+                            <a 
+                            class="cancel-link" 
+                            href="{{url_for('lightcourse.toggle_subscribe', course_id=course.id)}}">
+                                {%if course in current_user.light_courses%}
+                                    <i class="fa fa-check-circle" style="color:green"></i>
+                                {% else %}
+                                    <i class="fa fa-times-circle" style="color: red;"></i>
+                                {%endif%}
+                            </a>
+                        </td>
+                    </tr>
+                {%endif%}
+            {%else%}
+                {%set teacher = User.query.get(course.teacher_id)%}
+                <tr>
+                    <td>
+                    {{course.name}}
+                    </td>
+                    <td>
+                    {{teacher.name}}
+                    </td>
+                    <td>
+                    {{course.grade}}
+                    </td>
+                    <td>
+                        <a 
+                        class="cancel-link" 
+                        href="{{url_for('lightcourse.toggle_subscribe', course_id=course.id)}}">
+                            {%if course in current_user.light_courses%}
+                                <i class="fa fa-check-circle" style="color:green"></i>
+                            {% else %}
+                                <i class="fa fa-times-circle" style="color: red;"></i>
+                            {%endif%}
+                        </a>
+                    </td>
+                </tr>
+            {%endif%}
         {%endfor%}
         
     </tbody>

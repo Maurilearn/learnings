@@ -41,6 +41,8 @@ from userapi.html import notify_info
 from userapi.html import notify_warning
 from userapi.forms import flash_errors
 from userapi.email import send_mail
+from userapi.certificate import create_certificate
+from userapi.file import file_prefix
 
 from shopyoapi.enhance import base_context
 from shopyoapi.init import alldocs
@@ -57,7 +59,7 @@ from .forms import AddPhotosForm
 from .forms import SubmitHomeworkForm
 from .forms import AddHomeworkNoteForm
 
-from reportlab.pdfgen import canvas
+
 
 lightcourse_blueprint = Blueprint(
     "lightcourse",
@@ -118,7 +120,6 @@ def add_check():
         return jsonify({"submission": "ok"})
 
 @lightcourse_blueprint.route("/<course_id>/view", methods=['GET', 'POST'])
-@roles_required(['admin', 'teacher'])
 @login_required
 def view(course_id):
     context = base_context()
@@ -185,7 +186,6 @@ def add_chapter_check(course_id):
 
 
 @lightcourse_blueprint.route("/view/chapter/<chapter_id>", methods=['GET', 'POST'])
-@roles_required(['admin', 'teacher'])
 @login_required
 def view_chapter(chapter_id):
     context = base_context()
@@ -265,7 +265,7 @@ def resource_add_video_check(chapter_id):
             flash(notify_warning('No selected file'))
             return redirect(request.url)
         if file and video_allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+            filename = '{}_{}'.format(file_prefix(), secure_filename(file.filename))
             resource = LightResource(type='video', filename=filename)
             chapter.resources.append(resource)
             chapter.update()
@@ -284,6 +284,7 @@ def resource_add_alldocs_check(chapter_id):
     if request.method == 'POST':
         if form.validate_on_submit():
             filename = alldocs.save(request.files[form.file_input.data.name])
+            # filename = '{}_{}'.format(file_prefix(), filename)
             resource = LightResource(type='doc', filename=filename)
             chapter = LightChapter.query.get(chapter_id)
             chapter.resources.append(resource)
@@ -491,26 +492,7 @@ def approve_certif_req(certif_req_id):
         # flash(notify_info(fname))
         #with open(fname, 'w+') as f:
         #    f.write('')
-        c = canvas.Canvas(fname)
-        c.setTitle("Certificate")
-        init_y = 250
-        c.drawString(100, init_y,"Certificate Awarded To")
-        init_y -= 20
-        c.drawString(100, init_y, person.name)
-        init_y -= 20
-        c.drawString(100, init_y,"For")
-        init_y -= 20
-        c.drawString(100, init_y, course.name)
-        init_y -= 20
-        c.drawString(100, init_y, "On")
-        init_y -= 20
-        datetime_now = datetime.datetime.now()
-        datenow = '{} - {} - {}'.format(
-            datetime_now.year, 
-            datetime_now.month, 
-            datetime_now.day)
-        c.drawString(100, init_y, datenow)
-        c.save()
+        create_certificate(fname, person.name, course.name)
         certif.filename = filename
         certif.insert()
     except Exception as e:
@@ -582,26 +564,41 @@ def edit_quiz(course_id):
 def edit_quiz_check(course_id):
     try:
         if request.method == 'POST':
+            # flash(notify_info('entered post'))
             data = request.get_json()
             course = LightCourse.query.get(course_id)
             course.quizzes[:] = []
+            # flash(notify_info('cleared quizes'))
             for quiz in data['quizes']:
                 question = data['quizes'][quiz]['question']
                 question = json.dumps(question)
-                current_quiz = Quiz(question=question)
+                current_quiz = LightQuiz(question=question)
                 answers = data['quizes'][quiz]['answers']
                 for answer in answers:
                     ans = answer['string']
                     ans = json.dumps(ans)
                     current_quiz.answers.append(
-                        Answer(string=ans, correct=answer['correct']))
+                        LightAnswer(string=ans, correct=answer['correct']))
                 course.quizzes.append(current_quiz)
             
             course.update()
+            flash(notify_info('updated'))
             return jsonify({
-            "submission": "ok",
-            "go_to":url_for('lightcourse.view', course_id=course_id)})
-    except:
-        flash(notify_info(data))
+                "submission": "ok",
+                "go_to":url_for('lightcourse.view', course_id=course_id)})
+    except Exception as e:
+        # flash(notify_warning(e))
+        # flash(notify_info(data))
         return jsonify({
             "submission": "bad"})
+
+
+@lightcourse_blueprint.route("/<course_id>/unsubscribe", methods=['GET', 'POST'])
+@login_required
+def unsubscribe(course_id):
+    course = LightCourse.query.get(course_id)
+    flash(notify_warning('Unsubscribed from {}!'.format(course.name)))
+    current_user.light_courses.remove(course)
+    current_user.update()
+    
+    return redirect(url_for('course.mycourses'))

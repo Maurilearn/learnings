@@ -32,7 +32,7 @@
             {%set course = Course.query.get(cert_request.course_id) %}
         <tr>
             <td>{{course_taker.name}}</td>
-            <td>{{course.name}}</td>
+            <td>{{course.name}} {{course.grade}}</td>
             <td>
                 <a href="{{url_for('course.approve_certif_req', certif_req_id=cert_request.id)}}"
                     class="btn btn-success">approve</a>
@@ -67,7 +67,7 @@
             {%set course = Course.query.get(cert_request.course_id) %}
         <tr>
             <td>{{course_taker.name}}</td>
-            <td>{{course.name}}</td>
+            <td>{{course.name}} {{course.grade}}</td>
             <td>
                 <a href="{{url_for('lightcourse.approve_certif_req', certif_req_id=cert_request.id)}}"
                     class="btn btn-success">approve</a>

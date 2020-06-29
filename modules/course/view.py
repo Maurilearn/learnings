@@ -637,6 +637,7 @@ def mycourses():
     context = base_context()
     mycourses = current_user.courses
     context['mycourses'] = mycourses
+    context['light_mycourses'] = current_user.light_courses
     context['User'] = User
 
     return render_template('course/mycourses.html', **context)
@@ -688,6 +689,7 @@ def view_certificate_request():
     if current_user.role == 'admin':
         certif_requests = CertificateRequest.query.all()
         context['certif_requests'] = certif_requests
+
         light_certif_requests = LightCertificateRequest.query.all()
         context['light_certif_requests'] = light_certif_requests
     else:
@@ -700,7 +702,7 @@ def view_certificate_request():
 
         light_c_requests = []
         for cert_request_item in LightCertificateRequest.query.all():
-            course = Course.query.get(cert_request_item.course_id)
+            course = LightCourse.query.get(cert_request_item.course_id)
             if course.teacher_id == current_user.id:
                 light_c_requests.append(cert_request_item)
         context['light_certif_requests'] = light_c_requests

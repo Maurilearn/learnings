@@ -11,6 +11,8 @@ from modules.lightcourse.models import LightHomeworkSubmission
 from modules.lightcourse.models import LightHomeworkEvaluation
 from modules.lightcourse.models import LightCertificate 
 
+from modules.school.models import Setting
+
 from flask import Blueprint
 from flask import send_from_directory
 from flask import current_app
@@ -192,3 +194,15 @@ def light_certificate(course_id):
             '''
     else:
         return "You can't view this certificate"
+
+@cdn_blueprint.route('/school/logo', methods=["GET", "POST"])
+def school_logo():
+    logo = Setting.query.filter(
+            Setting.name == 'logo'
+        ).first()
+    if logo.value is None:
+        return send_from_directory(current_app.config['SCHOOL_DEFAULTS'],
+                            'logo.png', as_attachment=True)
+    else:
+        return send_from_directory(current_app.config['UPLOADED_PHOTOS_DEST'],
+                            logo.value, as_attachment=True)

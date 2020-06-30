@@ -1,0 +1,53 @@
+{% extends "base/base.html" %}
+
+
+{% block pagehead %}
+
+{% endblock %}
+
+
+
+{% block content %}
+{%set active_page = 'school_info'%}
+{%include 'course/partials/nav.html'%}
+
+
+<img src="{{url_for('cdn.school_logo')}}" width=200 
+    style="margin: 20px; border: 1px solid #ced4da; padding: 10px; border-radius: 5px; ">
+
+<form 
+    action="{{url_for('school.add_logo_check')}}"
+    method="POST"
+    enctype="multipart/form-data">
+  <div class="form-group">
+    <label for="exampleFormControlFile1">{{add_logo_form.file_input.label}}</label>
+    {{add_logo_form.file_input}}
+  </div>
+  {{add_logo_form.csrf_token}}
+  <input type="submit" name="" value="submit" class="btn btn-info">
+</form>
+<br><br>
+<form action="{{url_for('school.info_update_check')}}"
+    method="POST">
+    School name<br>
+    <div class="input-group mb-3">
+
+        <div class="input-group-prepend">
+            <span class="input-group-text"><i class="fa fa-info"></i></span>
+        </div>
+        <input type="text" name="school_name" class="form-control" value="{{school_name}}">
+    </div>
+
+    Contact mail<br>
+    <div class="input-group mb-3">
+
+        <div class="input-group-prepend">
+            <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+        </div>
+        <input type="text" name="contact_mail" class="form-control" value="{{contact_mail}}">
+    </div>
+
+    <input type="submit" name="" class="btn btn-info" value="save">
+    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+</form>
+{% endblock %}

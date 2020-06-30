@@ -5,6 +5,7 @@ from shopyoapi.init import db
 from app import app
 
 from modules.auth.models import User
+from modules.school.models import Setting
 # from modules.settings.models import Settings
 
 
@@ -30,3 +31,11 @@ def add_setting(name, value):
             db.session.add(s)
             db.session.commit()
 '''
+
+def add_setting(name, value):
+    with app.app_context():
+        s = Setting(
+            name=name, 
+            value=value)
+        s.insert()
+        print('[x] Added name:{} with value:{}'.format(name, value))

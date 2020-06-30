@@ -11,6 +11,7 @@ from shopyoapi.cmd import new_project
 from shopyoapi.cmd import clean
 from shopyoapi.cmd import initialise
 from shopyoapi.cmd import create_module
+from shopyoapi.cmd import apply_settings
 from shopyoapi.database import autoload_models
 from userapi.uploads import upload_all
 
@@ -52,6 +53,8 @@ def custom_commands(args):
             create_module(args[2])
         elif args[1] == 'populate':
             upload_all()
+        elif args[1] == 'applysettings':
+            apply_settings()
         sys.exit()
     elif args[1] == "db":
         autoload_models()

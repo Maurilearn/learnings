@@ -26,11 +26,18 @@
                 {%set teacher = User.query.get(course.teacher_id)%}
                 
                 {%if current_user.id == course.teacher_id%}
-                    <form>
+                    <form 
+                        class="form"
+                        method="POST"
+                        action="{{url_for('lightcourse.edit_course_name_check', course_id=course.id)}}">
                     <div class="input-group">
-                        <input type="text" name="" value="{{course.name}}" class="form-control">
-                        <input type="submit" name="" value="save" class="btn btn-info">
+                        <input type="text" 
+                        class=" form-control"name="course_name" value="{{course.name}}" class="form-control">
+                        <div class="input-group-append" style="z-index: 0">
+                            <input type="submit" name="" value="save" class="btn btn-info">
+                        </div>
                     </div>
+                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                     </form>
                 {%else%}
                     <h2>{{course.name}}</h2>
@@ -66,10 +73,17 @@
                 {%for chapter in course.chapters%}
                     
                     {%if current_user.id == course.teacher_id%}
-                        <form>
+                        <form
+                        method="POST"
+                        action="{{url_for('lightcourse.chapter_name_edit_check', chapter_id=chapter.id)}}">
+                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                         <div class="input-group">
-                            <a href="{{url_for('lightcourse.view_chapter', chapter_id=chapter.id)}}" class="btn btn-info"><i class="fa fa-book"></i> </a> &nbsp;
-                            <input style="z-index: 0" type="text" name="" value="{{chapter.name}}" class="form-control">
+                            <div class="input-group-prepend" style="z-index: 0">
+                                <a href="{{url_for('lightcourse.view_chapter', chapter_id=chapter.id)}}" class="btn btn-info">View </a>
+                            </div>
+                            
+                            <input style="z-index: 0" type="text" name="chapter_name" value="{{chapter.name}}" class="form-control">
+
                             <div class="input-group-append" style="z-index: 0">
                                 <input type="submit" name="" value="save" class="btn btn-info">
                             </div>

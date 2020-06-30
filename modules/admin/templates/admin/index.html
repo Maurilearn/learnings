@@ -16,16 +16,16 @@
 
 <nav aria-label="Page navigation example">
   <ul class="pagination">
-      {% if teachers.has_prev %}
-        <li class="page-item"> <a class="page-link" href="{{ url_for('teacher.index', page=teachers.prev_num) }}">Previous</a></li>
+      {% if admins.has_prev %}
+        <li class="page-item"> <a class="page-link" href="{{ url_for('admin.index', page=admins.prev_num) }}">Previous</a></li>
       {% else %}
         <li class="page-item"><a class="page-link btn disabled" href="#">Previous</a></li>
       {% endif %}
 
       
 
-      {% if teachers.has_next %}
-        <li class="page-item"> <a class="page-link" href="{{ url_for('teacher.index', page=teachers.next_num) }}">Next</a></li>
+      {% if admins.has_next %}
+        <li class="page-item"> <a class="page-link" href="{{ url_for('admin.index', page=admins.next_num) }}">Next</a></li>
       {% else %}
         <li class="page-item"><a class="page-link btn disabled" href="#">Next</a></li>
       {% endif %}
@@ -44,21 +44,21 @@
             </tr>
           </thead>
           <tbody>
-            {%for teacher in teachers.items%}
+            {%for admin in admins.items%}
             <tr>
-              <form action="{{url_for('teacher.edit', teacher_id=teacher.id)}}" method="POST">
-                <td><input style="" name="teacher_name"
-                      class="form-control" value="{{teacher.name}}"></td>
-                <td><input style="" name="teacher_email"
-                      class="form-control" value="{{teacher.email}}"></td>
-                <td><input style="" name="teacher_password" 
+              <form action="{{url_for('admin.edit', admin_id=admin.id)}}" method="POST">
+                <td><input style="" name="admin_name"
+                      class="form-control" value="{{admin.name}}"></td>
+                <td><input style="" name="admin_email"
+                      class="form-control" value="{{admin.email}}"></td>
+                <td><input style="" name="admin_password" 
                       class="form-control" value=""></td>
                 <td><input style="" class="btn btn-info" type="submit" value="save"></td>
                     <input style="" type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               </form>
               <td><a style="" 
                     class="btn btn-danger" 
-                    href="{{url_for('teacher.delete', teacher_id=teacher.id)}}">delete</a></td>
+                    href="{{url_for('admin.delete', admin_id=admin.id)}}">delete</a></td>
             </tr>
             {%endfor%}
           </tbody>
@@ -69,10 +69,10 @@
     <div class="col-sm-3">
         <div class="card">
           <div class="card-header">
-            Add Teacher
+            Add Admin
           </div>
           <div class="card-body">
-            <form action="{{url_for('teacher.add_check')}}" method="POST">
+            <form action="{{url_for('admin.add_check')}}" method="POST">
               <div class="form-field">
               {{ form.name.label }} <br>
               <div class="input-group mb-3">

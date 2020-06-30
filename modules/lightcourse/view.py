@@ -159,6 +159,26 @@ def view(course_id):
     return render_template('lightcourse/view.html', **context)
 
 
+@lightcourse_blueprint.route("/<course_id>/edit/name/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def edit_course_name_check(course_id):
+    if request.method == 'POST':
+        course = LightCourse.query.get(course_id)
+        if not (current_user.id == course.teacher_id or current_user.role == 'admin'):
+            return "You don't have permission to edit"
+        course_name = request.form['course_name']
+        if course_name.strip():
+            course.name = course_name
+            course.update()
+            flash(notify_success('Course name updated!'))
+            return redirect(url_for('lightcourse.view', course_id=course_id))
+        else:
+            flash(notify_warning('Course name cannot be empty!'))
+            return redirect(url_for('lightcourse.view', course_id=course_id))
+
+
+
 @lightcourse_blueprint.route("/<course_id>/delete", methods=['GET', 'POST'])
 @roles_required(['admin', 'teacher'])
 @login_required
@@ -183,6 +203,26 @@ def add_chapter_check(course_id):
             flash_errors(form)
 
     return redirect(url_for('lightcourse.view', course_id=course_id))
+
+
+@lightcourse_blueprint.route("/chapter/<chapter_id>/edit/name/check", methods=['GET', 'POST'])
+@roles_required(['admin', 'teacher'])
+@login_required
+def chapter_name_edit_check(chapter_id):
+    if request.method == 'POST':
+        chapter = LightChapter.query.get(chapter_id)
+        course = chapter.course
+        if not (current_user.id == course.teacher_id or current_user.role == 'admin'):
+            return "You don't have permission to edit"
+        chapter_name = request.form['chapter_name']
+        if chapter_name.strip():
+            chapter.name = chapter_name
+            chapter.update()
+            flash(notify_success('Chapter name updated!'))
+            return redirect(url_for('lightcourse.view', course_id=course.id))
+        else:
+            flash(notify_warning('Chapter name cannot be empty!'))
+            return redirect(url_for('lightcourse.view', course_id=course.id))
 
 
 @lightcourse_blueprint.route("/view/chapter/<chapter_id>", methods=['GET', 'POST'])
@@ -334,7 +374,6 @@ def add_homework_check(chapter_id):
 
 
 @lightcourse_blueprint.route("/chapter/<chapter_id>/submit/homework/check", methods=['GET', 'POST'])
-@roles_required(['admin', 'teacher'])
 @login_required
 def submit_homework_check(chapter_id):
     form = SubmitHomeworkForm()

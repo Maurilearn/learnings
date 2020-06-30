@@ -5,13 +5,14 @@ import subprocess
 import json
 import importlib
 
+from app import app
 from shopyoapi.init import db
 from shopyoapi.utils import trycopytree
 from shopyoapi.utils import trycopy
 from shopyoapi.utils import trymkdir
 from shopyoapi.utils import trymkfile
 from shopyoapi.uploads import add_admin
-
+from shopyoapi.uploads import add_setting
 
 #from shopyoapi.uploads import add_setting
 
@@ -130,6 +131,12 @@ def initialise():
             admin_config["password"]
         )
 
+    print("Applying settings")
+    print("#######################")
+    subprocess.run(
+        [sys.executable, "manage.py", "applysettings"], stdout=subprocess.PIPE
+    )
+
     print("Done!")
 
 def create_module(modulename):
@@ -155,4 +162,14 @@ def index():
     trymkfile(base_path+'/'+'view.py', view_content)
     trymkfile(base_path+'/'+'forms.py', '')
     trymkfile(base_path+'/'+'models.py', '')
+
+
+def apply_settings():
+    with open("config.json", "r") as config:
+        config = json.load(config)
+    add_setting('school_name', config['school']['name'])
+    add_setting('contact_mail', config['school']['contact_mail'])
+    add_setting('logo', None)
+
+
 

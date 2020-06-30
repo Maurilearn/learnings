@@ -33,9 +33,10 @@
                     class="" 
                     method=post enctype=multipart/form-data
                     action="{{url_for('lightcourse.resource_add_video_check', chapter_id=chapter.id)}}">
+                    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
 
                       <div class="input-group mb-3">
-                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+                        
                         <div class="input-group-prepend">
                           <span class="input-group-text">Video</span>
                         </div>
@@ -49,9 +50,8 @@
                     class="" 
                     method="POST" enctype="multipart/form-data"
                     action="{{url_for('lightcourse.resource_add_alldocs_check', chapter_id=chapter.id)}}">
-
+                    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                       <div class="input-group mb-3">
-                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                         <div class="input-group-prepend">
                           <span class="input-group-text">{{add_docs_form.file_input.label}}</span>
                         </div>
@@ -66,9 +66,8 @@
                     class="" 
                     method=post enctype=multipart/form-data
                     action="{{url_for('lightcourse.add_homework_check', chapter_id=chapter.id)}}">
-
+                    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                       <div class="input-group mb-3">
-                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                         <div class="input-group-prepend">
                           <span class="input-group-text">{{add_homework_form.file_input.label}}</span>
                         </div>
@@ -83,9 +82,8 @@
                     class="" 
                     method=post enctype=multipart/form-data
                     action="{{url_for('lightcourse.resource_add_photos_check', chapter_id=chapter.id)}}">
-
+                    <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                       <div class="input-group mb-3">
-                        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
                         <div class="input-group-prepend">
                           <span class="input-group-text">{{add_photos_form.file_input.label}}</span>
                         </div>

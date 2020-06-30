@@ -132,3 +132,4 @@ migrations/
 config.py
 config.json
 static/uploads/
+static/certificates/

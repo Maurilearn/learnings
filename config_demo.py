@@ -57,6 +57,7 @@ class Config:
 
     DEFAULT_PASS_ALL = 'pass'
     LIGHTCOURSE_QUIZ_NUM = 2
+    SCHOOL_DEFAULTS = os.path.join(STATIC_DIR, 'default')
 
 
 class DevelopmentConfig(Config):

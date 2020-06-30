@@ -11,5 +11,9 @@
       "password": "pass",
       "name": "John Doe"
       }
-    ]
+    ],
+    "school":{
+      "name":"SomeSchool",
+      "contact_mail":"contact@someschool.com"
+    }
 }

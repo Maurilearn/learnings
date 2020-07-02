@@ -62,4 +62,4 @@ with open(os.path.join(base_path, 'config.json')) as f:
 app = create_app(json_info["environment"])
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run()

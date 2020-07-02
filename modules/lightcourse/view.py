@@ -183,6 +183,7 @@ def edit_course_name_check(course_id):
 @roles_required(['admin', 'teacher'])
 @login_required
 def delete(course_id):
+
     course  = LightCourse.query.get(course_id)
     course.delete()
     flash(notify_danger('course deleted!'))

@@ -13,7 +13,7 @@ from shopyoapi.init import docs
 from shopyoapi.init import homeworksubmits
 from shopyoapi.init import alldocs
 
-from config import app_config
+from .config import app_config
 from flask_wtf.csrf import CSRFProtect
 from modules.auth.models import User
 from flask_uploads import UploadSet, configure_uploads, IMAGES

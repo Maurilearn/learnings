@@ -26,9 +26,9 @@ def runserver():
     app.run()
 
 
-def rundebug():
+def rundebug(port=5000):
     print('LEARNING MANAGEMENT SYSTEM')
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True, host="0.0.0.0", port=port)
 
 
 def custom_commands(args):
@@ -43,7 +43,10 @@ def custom_commands(args):
         elif args[1] == "runserver":
             runserver()
         elif args[1] == "rundebug":
-            rundebug()
+            if args[2]:
+                rundebug(port=int(args[2]))
+            else:
+                rundebug()
         elif args[1] == "test":
             print("test ok")
         elif args[1] == "new" and args[2] and args[3]:

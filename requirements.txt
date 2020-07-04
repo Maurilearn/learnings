@@ -10,3 +10,5 @@ markdown
 werkzeug==0.16.1
 flask_wtf
 email_validator
+pandas
+xlrd

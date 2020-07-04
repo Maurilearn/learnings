@@ -43,7 +43,7 @@ def custom_commands(args):
         elif args[1] == "runserver":
             runserver()
         elif args[1] == "rundebug":
-            if args[2]:
+            if len(args) == 2+1:
                 rundebug(port=int(args[2]))
             else:
                 rundebug()

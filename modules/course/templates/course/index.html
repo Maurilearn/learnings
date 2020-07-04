@@ -12,9 +12,15 @@
 {%include 'course/partials/nav.html'%}
 <br>
 
-{%if current_user.role == 'teacher'%}
-<a class="btn btn-info" href="{{url_for('lightcourse.add')}}"><i class="fa fa-plus"></i> Add Light Course</a>
-<a class="btn btn-info" href="{{url_for('course.add')}}"><i class="fa fa-plus"></i> Add Full Course</a>
+{%if num_grades > 0%}
+    {%if current_user.role == 'teacher'%}
+    <a class="btn btn-info" href="{{url_for('lightcourse.add')}}"><i class="fa fa-plus"></i> Add Light Course</a>
+    <a class="btn btn-info" href="{{url_for('course.add')}}"><i class="fa fa-plus"></i> Add Full Course</a>
+    {%endif%}
+{%else%}
+    Cannot create course as
+    no grades found. <br>
+    Please ask admins to add more classes.
 {%endif%}
 
 <br><br>

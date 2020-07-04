@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="/static/fontawesome/css/all.css">
     <!--<link rel="stylesheet" href="{{ url_for('static', filename = 'style.css') }}">-->
     
+    <link rel="icon" href="{{url_for('cdn.school_logo')}}"
+        type="image/x-icon"> 
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -66,6 +68,18 @@
             border-radius: 5px;
             padding: 5px;
             margin: 5px;
+          }
+          .app-logout{
+            background-color: #da8227 !important;
+            border-radius: 5px;
+            padding: 5px;
+            margin: 5px;
+          }
+          .app-logout:hover{
+            background-color: #ea953e !important;
+          }
+          .app-logout > a{
+            color: #fff !important;
           }
           .app-active:hover{
             background-color: #4f575f !important;

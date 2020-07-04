@@ -8,6 +8,7 @@ from modules.lightcourse.models import LightCourse
 from modules.lightcourse.models import LightHomeworkSubmission
 from modules.lightcourse.models import LightCertificateRequest
 
+from .models import Grade
 from .models import Course
 from .models import Section
 from .models import SubSection
@@ -97,6 +98,7 @@ def index():
             ).all()
     context['courses'] = courses
     context['light_courses'] = light_courses
+    context['num_grades'] = Grade.query.count()
     return render_template('course/index.html', **context)
 
 @course_blueprint.route("/add")

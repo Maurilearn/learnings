@@ -34,7 +34,7 @@ class Course(db.Model):
     name = db.Column(db.String(100))
     created_date = db.Column(db.DateTime, default=datetime.now())
     submitted = db.Column(db.Boolean, default=False)
-    teacher_id = db.Column(db.Integer, db.ForeignKey('users.id'),
+    teacher_id = db.Column(db.Integer, 
         nullable=False)
     sections = db.relationship('Section', backref='course', lazy=True,
         cascade="all, delete, delete-orphan")

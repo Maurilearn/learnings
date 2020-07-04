@@ -10,7 +10,9 @@
 <br><br>
 <div class="containers" style="padding-right: 10%; padding-left: 10%;">
 <form action="{{ url_for('auth.check_login') }}" method="POST">
-    <h1>{{APP_NAME}}</h1>
+    <div class="text-center">
+        <img src="{{url_for('cdn.school_logo')}}" width="200"> 
+    </div>
     <div class="form-field">
     {{ form.email.label }} <br>
     

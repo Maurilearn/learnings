@@ -10,4 +10,4 @@ bulk_blueprint = Blueprint(
 
 @bulk_blueprint.route("/")
 def index():
-    pass
+    return 'not yet implemented'

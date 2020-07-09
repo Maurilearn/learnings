@@ -26,6 +26,7 @@ from shopyoapi.enhance import base_context
 from userapi.html import notify_success
 from userapi.html import notify_danger
 from userapi.html import notify_info
+from userapi.forms import flash_errors
 
 student_blueprint = Blueprint(
     "student",
@@ -84,6 +85,7 @@ def add_grade_check():
         form = AddGradeForm()
         # if form.validate_on_submit():
         if not form.validate_on_submit():
+            flash_errors(form)
             return redirect(url_for('student.index'))
 
         grade = Grade.query.filter(
@@ -132,7 +134,8 @@ def add_check(grade_id):
         form = AddStudentForm()
         # if form.validate_on_submit():
         if not form.validate_on_submit():
-            return redirect(url_for('student.index'))
+            flash_errors(form)
+            return redirect(url_for('student.view', grade_id=grade_id))
 
         user = User.query.filter(
             User.email == form.email.data

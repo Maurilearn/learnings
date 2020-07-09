@@ -11,6 +11,7 @@
 {%set active_page = 'manage'%}
 {%include 'course/partials/nav.html'%}
 <br>
+<h2>Teachers</h2>
 <div class="row">
     <div class="col-sm-9">
 
@@ -51,7 +52,7 @@
                       class="form-control" value="{{teacher.name}}"></td>
                 <td><input style="" name="teacher_email"
                       class="form-control" value="{{teacher.email}}"></td>
-                <td><input style="" name="teacher_password" 
+                <td><input style="" name="teacher_password" type="password" 
                       class="form-control" value=""></td>
                 <td><input style="" class="btn btn-info" type="submit" value="save"></td>
                     <input style="" type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>

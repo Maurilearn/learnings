@@ -24,6 +24,7 @@ from userapi.html import notify_success
 from userapi.html import notify_danger
 from userapi.html import notify_info
 from userapi.html import notify_warning
+from userapi.forms import flash_errors
 
 admin_blueprint = Blueprint(
     "admin",
@@ -68,8 +69,8 @@ def add_check():
         form = AddAdminForm()
         # if form.validate_on_submit():
         if not form.validate_on_submit():
-            flash(notify_warning('Form not valid!'))
-            return render_template(url_for('course.index'))
+            flash_errors(form)
+            return redirect(url_for('admin.index'))
         user = User.query.filter(
             User.email == form.email.data
         ).first()

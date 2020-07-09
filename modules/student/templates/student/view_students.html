@@ -58,7 +58,7 @@
                   class="form-control" value="{{student.name}}"></td>
             <td><input name="student_email"
                   class="form-control" value="{{student.email}}"></td>
-            <td><input name="student_password" 
+            <td><input name="student_password" type="password"
                   class="form-control" value=""></td>
             <td><input class="btn btn-info" type="submit" value="save"></td>
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>

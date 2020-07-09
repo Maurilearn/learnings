@@ -180,7 +180,7 @@ def edit(student_id, grade_id):
             student.set_hash(request.form['student_password'])
         student.update()
         flash(notify_info('Saved {}!'.format(student.name)))
-        return redirect(url_for('student.view', grade_id=grade.id))
+        return redirect(url_for('student.view', grade_id=grade_id))
 
 '''
 

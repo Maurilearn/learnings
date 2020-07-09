@@ -3,6 +3,7 @@ import os
 
 from flask import Flask, redirect, send_from_directory
 from flask import url_for
+from flask import session
 import json
 from shopyoapi.init import db
 from shopyoapi.init import login_manager
@@ -17,6 +18,7 @@ from config import app_config
 from flask_wtf.csrf import CSRFProtect
 from modules.auth.models import User
 from flask_uploads import UploadSet, configure_uploads, IMAGES
+from flask_login import current_user
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -51,7 +53,12 @@ def create_app(config_name):
 
     @app.route("/")
     def index():
-        return redirect(url_for('auth.login'))
+        if current_user.is_authenticated:
+            if 'user_role' in session:
+                if session['user_role'] == 'teacher':
+                    return redirect('/teacher/')
+        else:
+            return redirect(url_for('auth.login'))
 
     return app
 

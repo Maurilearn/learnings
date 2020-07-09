@@ -10,6 +10,7 @@ from flask import render_template
 from flask import request
 from flask import flash
 from flask import current_app
+from flask import session
 
 from flask_login import login_required
 from flask_login import login_user
@@ -34,10 +35,11 @@ teacher_blueprint = Blueprint(
 )
 
 @teacher_blueprint.after_request
-def teacher_after_request(response):
-    if current_user.check_hash(current_app.config['DEFAULT_PASS_ALL']):
-        flash(notify_info('Change default password please to get access!'))
-        return redirect(url_for('auth.change_pass', user_id=current_user.id))
+def teacher_after_request(response):   
+    if current_user.is_authenticated: 
+        if current_user.check_hash(current_app.config['DEFAULT_PASS_ALL']):
+            flash(notify_info('Change default password please to get access!'))
+            return redirect(url_for('auth.change_pass', user_id=current_user.id))
     return response
 
 @teacher_blueprint.route("/", methods=['GET'], defaults={"page": 1})
@@ -45,6 +47,7 @@ def teacher_after_request(response):
 @roles_required(['admin'])
 @login_required
 def index(page):
+    session['user_role'] = 'teacher'
     context = base_context()
     page = page
     per_page = 5

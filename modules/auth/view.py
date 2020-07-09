@@ -6,6 +6,7 @@ from flask import redirect
 from flask import render_template
 from flask import request
 from flask import flash
+from flask import session
 
 from flask_login import login_required
 from flask_login import login_user
@@ -27,6 +28,10 @@ auth_blueprint = Blueprint(
 
 @auth_blueprint.route("/login")
 def login():
+    if current_user.is_authenticated:
+        if 'user_role' in session:
+            if session['user_role'] == 'teacher':
+                return redirect('/teacher/')
     context = base_context()
     form = LoginForm()
     context['form'] = form
@@ -35,7 +40,9 @@ def login():
 
 @auth_blueprint.route("/logout")
 def logout():
+    print('logging out')
     logout_user()
+    print('logging out')
     return redirect(url_for('auth.login'))
 
 

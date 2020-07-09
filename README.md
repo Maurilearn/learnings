@@ -1,3 +1,9 @@
+View technical docs [here](docs/technical_docs.md)
+
+
+INSTALLATION
+
+
 # download python
 
 [download](https://www.python.org/downloads/)

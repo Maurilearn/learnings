@@ -49,6 +49,12 @@ CREATE DATABASE maurilearn;
 
 on the mysql console
 
+# Files
+
+create a file named config.py and copy the content of config_demo.py in it
+
+create a file named config.json and copy the content of config_demo.json in it
+
 # Configure connection
 
 In config.py under `class DevelopmentConfig(Config)` set the username, server_name and db name
@@ -62,11 +68,7 @@ SQLALCHEMY_DATABASE_URI = "mysql+pymysql://{username}:{password}@{server_name}/{
         )
 ```
 
-# Files
 
-create a file named config.py and copy the content of config_demo.py in it
-
-create a file named config.json and copy the content of config_demo.json in it
 
 
 # Default password and environment
